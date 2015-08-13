@@ -1,0 +1,15 @@
+{
+  "name": "resume",
+  "version": "0.0.1",
+  "description": "Resume maker using JSON resume",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "resume",
+    "json"
+  ],
+  "author": "Will Acton",
+  "license": "MIT"
+}
