@@ -5,10 +5,10 @@ function getResumeJSON() {
 	return new Promise((resolve, reject) => {
 		const xhr = new XMLHttpRequest();
 		xhr.open('get', '/json/resume.json');
-		
+
 		xhr.onload = () => {
 			if (this.status === 200) {
-				resolve(xhr.response);
+				resolve(JSON.parse(xhr.response));
 			}
 			else {
 				reject({
