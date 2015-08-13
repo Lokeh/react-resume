@@ -7,24 +7,26 @@ function getResumeJSON() {
 		xhr.open('get', '/json/resume.json');
 
 		xhr.onload = () => {
-			if (this.status === 200) {
+			if (xhr.status === 200) {
 				resolve(JSON.parse(xhr.response));
 			}
 			else {
 				reject({
-					status: this.status,
-					statusText: this.statusText
+					status: xhr.status,
+					statusText: xhr.statusText
 				});
 			}
 		};
 
 		xhr.onerror = () => {
 			reject({
-				status: this.status,
-				statusText: this.statusText
+				status: xhr.status,
+				statusText: xhr.statusText
 			});
 		};
 
 		xhr.send();
 	});
 }
+
+module.exports = getResumeJSON;
