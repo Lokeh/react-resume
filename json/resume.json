@@ -1,7 +1,7 @@
 {
   "basics": {
     "name": "Will Acton",
-    "label": "Programmer",
+    "label": "Front End Developer",
     "picture": "",
     "email": "hello@willacton.com",
     "phone": "(912) 555-4321",
@@ -17,13 +17,13 @@
     "profiles": [
       {
         "network": "Twitter",
-        "username": "neutralthoughts",
+        "username": "lilactown_",
         "url": ""
       },
       {
-        "network": "SoundCloud",
-        "username": "dandymusicnl",
-        "url": "https://soundcloud.com/dandymusicnl"
+        "network": "GitHub",
+        "username": "Lokeh",
+        "url": ""
       }
     ]
   },
@@ -40,6 +40,14 @@
         "Successfully won Techcrunch Disrupt",
         "Optimized an algorithm that holds the current world record for Weisman Scores"
       ]
+    },
+    {
+      "company": "Cambia Health Solutions",
+      "position": "Front End Developer",
+      "startDate": "2014-09-03",
+      "endDate": "Present",
+      "summary": "blah",
+      "highlights": []
     }
   ],
   "volunteer": [
@@ -104,6 +112,10 @@
         "MP4",
         "GIF"
       ]
+    },
+    {
+      "name": "Test",
+      "level": "Beginner"
     }
   ],
   "languages": [

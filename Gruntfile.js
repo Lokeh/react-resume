@@ -8,7 +8,7 @@ module.exports = function(grunt) {
 				src: ['.'],
 				dest: 'dist/js/libs.js',
 				options: {
-					alias: ['react', 'bluebird']
+					alias: ['react:', 'bluebird:', 'immutable:', 'material-ui:']
 				}
 			},
 			app: {
@@ -17,7 +17,7 @@ module.exports = function(grunt) {
 				options: {
 					watch: true,
 					keepAlive: true,
-					external: ['react', 'bluebird']
+					external: ['react', 'bluebird', 'immutable', 'material-ui']
 				}
 			}
 		}

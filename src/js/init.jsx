@@ -1,24 +1,17 @@
 // init
 
 const React = require('react');
-const getResumeJSON = require('./libs/getResumeJSON');
+const injectTapEventPlugin = require("react-tap-event-plugin");
 
-const Resume = React.createClass({
-	getInitialState() {
-		return { resume: {} };
-	},
-	componentWillMount() {
-		getResumeJSON()
-			.then((resume) => this.setState({ resume }))
-			.catch((...err) => console.error(...err));
-	},
-	render() {
-		console.log(this.state.resume);
-		return(
-			<h1>Hello, world!</h1>
-		);
-	}
-});
+//Needed for onTouchTap
+//Can go away when react 1.0 release
+//Check this repo:
+//https://github.com/zilverline/react-tap-event-plugin
+injectTapEventPlugin();
+
+const Resume = require('./components/Resume');
+
+
 
 React.render(<Resume />, document.getElementById('app'));
 
