@@ -10,8 +10,9 @@ const injectTapEventPlugin = require("react-tap-event-plugin");
 injectTapEventPlugin();
 
 const Resume = require('./components/Resume');
+const Editor = require('./components/Editor');
 
 
 
-React.render(<Resume />, document.getElementById('app'));
+React.render(<Editor />, document.getElementById('app'));
 
