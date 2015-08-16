@@ -4,6 +4,9 @@ const Immutable = require('immutable');
 const {Map, List} = Immutable;
 
 const getResumeJSON = require('../../libs/getResumeJSON');
+const ResumeStore = require('../../stores/ResumeStore');
+React.initializeTouchEvents(true);
+
 
 // Material UI
 const mui = require('material-ui');
@@ -35,18 +38,22 @@ const Resume = React.createClass({
 		});
 	},
 	getInitialState() {
-		return { resume: Immutable.Map({}) };
+		return { resume: ResumeStore.getAll() };
+	},
+	_onChange() {
+		this.setState({ resume: ResumeStore.getAll() });
 	},
 	componentWillMount() {
-		getResumeJSON()
-			.then((resume) => this.setState({ resume: Immutable.fromJS(resume) }))
-			.catch((err) => console.error(err));
+		ResumeStore.addChangeListener(this._onChange);
 	},
 	render() {
 		if (this.state.resume.size === 0) return (<div></div>);
 		return(<div>
 			<AppBar
-				title="My Resume" zDepth={0}/>
+				onLeftIconButtonTouchTap={this.props.onAppBarTouch}
+				title="My Resume"
+				zDepth={0}
+			/>
 			<div style={{padding: "25px", maxWidth: "800px"}}>
 				<Basics info={this.state.resume.get('basics')}/>
 				<Work info={this.state.resume.get('work')} />

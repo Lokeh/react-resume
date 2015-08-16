@@ -1,22 +1,36 @@
 // Top-level component
 const React = require('react');
 const Immutable = require('immutable');
-const Cursor = require('immutable/contrib/cursor');
 const {List, Map} = Immutable;
 
 const getResumeJSON = require('../../libs/getResumeJSON');
 const ResumeStore = require('../../stores/ResumeStore');
 
-function buildElements(value, key, iter) {
-	console.log(iter._keyPath);
-	
-}
-
-const Attribute = React.createClass({
+const Entry = React.createClass({
+	propTypes: {
+		keyName: React.PropTypes.oneOfType([
+			React.PropTypes.string,
+			React.PropTypes.number
+		]).isRequired,
+		value: React.PropTypes.oneOfType([
+			React.PropTypes.instanceOf(List),
+			React.PropTypes.instanceOf(Map),
+			React.PropTypes.string
+		]).isRequired,
+		path: React.PropTypes.string.isRequired
+	},
+	parsePath(path) {
+		const _path = path.split('.')
+		_path.pop();
+		return _path;
+	},
 	_onChange(e) {
-		const path = this.props.path.split('.')
-		path.pop();
-		ResumeStore.setIn(path, e.target.value);
+		ResumeStore.setIn(this.parsePath(this.props.path), e.target.value);
+	},
+	deletePath(e) {
+		e.preventDefault();
+		console.log(this.parsePath(this.props.path));
+		ResumeStore.deleteIn(this.parsePath(this.props.path));
 	},
 	render() {
 		const value = this.props.value;
@@ -24,12 +38,17 @@ const Attribute = React.createClass({
 			<div style={{marginLeft: "20px"}}>
 			{this.props.keyName}:{' '}
 			{
-				typeof value === 'string' ?
-				<input value={value} onChange={this._onChange} /> :
-				(<span>{'{'} {value.map((v, k) => {
-					return (<Attribute key={k} value={v} keyName={k} path={this.props.path+k+'.'} />);
-				}).toList()} {'}'}</span>)
+				(Map.isMap(value) ?
+					(<span>{'{'} {value.map((v, k) => {
+						return (<Entry key={k} value={v} keyName={k} path={this.props.path+k+'.'} />);
+					}).toList()} {'}'}</span>) :
+				(List.isList(value) ?
+					(<span>{'['} {value.map((v, k) => {
+						return (<Entry key={k} value={v} keyName={k} path={this.props.path+k+'.'} />);
+					}).toList()} {']'}</span>) :
+				<input value={value} onChange={this._onChange} />))
 			}
+			<a href="#" onClick={this.deletePath}>( - )</a>
 			</div>
 		);
 	}
@@ -53,10 +72,7 @@ const Editor = React.createClass({
 	render() {
 		return (
 			<div>
-				{/*resume: {'{'}
-				{this.state.resume.map(buildElements).toList()}
-				{'}'}*/}
-				<Attribute value={this.state.resume} keyName="resume" path="" />
+				<Entry value={this.state.resume} keyName="resume" path="" />
 			</div>
 		);
 	}

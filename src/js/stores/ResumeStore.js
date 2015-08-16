@@ -25,6 +25,9 @@ const ResumeStore = assign({}, EventEmitter.prototype, {
 	setIn(path, value) {
 		_store = _store.setIn(path, value);
 		this.emitChange();
+	},
+	deleteIn(path) {
+		this.new(_store.deleteIn(path));
 	}
 });
 
