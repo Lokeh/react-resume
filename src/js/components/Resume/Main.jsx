@@ -39,7 +39,6 @@ const Resume = React.createClass({
 		this.setState({ resume: ResumeModel.getAll() });
 	},
 	componentWillMount() {
-		console.log('hi');
 		ResumeModel.addChangeListener(this._onChange);
 		ThemeManager.setPalette({
 			primary1Color: "#2C3E50"

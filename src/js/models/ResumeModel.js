@@ -22,6 +22,12 @@ const ResumeModel = assign({}, EventEmitter.prototype, {
 		_Model = newModel;
 		this.emitChange();
 	},
+	getIn(path) {
+		return _Model.getIn(path);
+	},
+	push(path, value) {
+		this.setIn(path, this.getIn(path).push(value));
+	},
 	setIn(path, value) {
 		_Model = _Model.setIn(path, value);
 		this.emitChange();
