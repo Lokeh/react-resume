@@ -4,7 +4,7 @@ const Immutable = require('immutable');
 const {List, Map} = Immutable;
 
 const getResumeJSON = require('../../libs/getResumeJSON');
-const ResumeStore = require('../../stores/ResumeStore');
+const ResumeModel = require('../../models/ResumeModel');
 
 const Entry = React.createClass({
 	propTypes: {
@@ -25,12 +25,12 @@ const Entry = React.createClass({
 		return _path;
 	},
 	_onChange(e) {
-		ResumeStore.setIn(this.parsePath(this.props.path), e.target.value);
+		ResumeModel.setIn(this.parsePath(this.props.path), e.target.value);
 	},
 	deletePath(e) {
 		e.preventDefault();
 		console.log(this.parsePath(this.props.path));
-		ResumeStore.deleteIn(this.parsePath(this.props.path));
+		ResumeModel.deleteIn(this.parsePath(this.props.path));
 	},
 	render() {
 		const value = this.props.value;
@@ -39,16 +39,19 @@ const Entry = React.createClass({
 			{this.props.keyName}:{' '}
 			{
 				(Map.isMap(value) ?
-					(<span>{'{'} {value.map((v, k) => {
-						return (<Entry key={k} value={v} keyName={k} path={this.props.path+k+'.'} />);
+					(<span>{'{'} <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a>
+						{value.map((v, k) => {
+							return (<Entry key={k} value={v} keyName={k} path={this.props.path+k+'.'} />);
 					}).toList()} {'}'}</span>) :
 				(List.isList(value) ?
-					(<span>{'['} {value.map((v, k) => {
-						return (<Entry key={k} value={v} keyName={k} path={this.props.path+k+'.'} />);
+					(<span>{'['} <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a>
+						{value.map((v, k) => {
+							return (<Entry key={k} value={v} keyName={k} path={this.props.path+k+'.'} />);
 					}).toList()} {']'}</span>) :
-				<input value={value} onChange={this._onChange} />))
+				(<span className="input">
+					"<input type="text" value={value} onChange={this._onChange} size={value.length} />" <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a>
+				</span>)))
 			}
-			<a href="#" onClick={this.deletePath}>( - )</a>
 			</div>
 		);
 	}
@@ -57,16 +60,16 @@ const Entry = React.createClass({
 const Editor = React.createClass({
 	getInitialState() {
 		return {
-			resume: ResumeStore.getAll()
+			resume: ResumeModel.getAll()
 		};
 	},
 	_onChange() {
-		this.setState({ resume: ResumeStore.getAll() });
+		this.setState({ resume: ResumeModel.getAll() });
 	},
 	componentWillMount() {
-		ResumeStore.addChangeListener(this._onChange);
+		ResumeModel.addChangeListener(this._onChange);
 		getResumeJSON()
-			.then((resume) => ResumeStore.new(Immutable.fromJS(resume)))
+			.then((resume) => ResumeModel.new(Immutable.fromJS(resume)))
 			.catch((err) => console.error(err));
 	},
 	render() {

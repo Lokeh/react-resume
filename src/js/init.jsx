@@ -23,7 +23,7 @@ const App = React.createClass({
 				<div className="editor" style={{display: hidden}}>
 					<Editor />
 				</div>
-				<div style={{float: "left", width: width}}>
+				<div className="display" style={{float: "left", width: width}}>
 					<Resume onAppBarTouch={this.toggleEditor} />
 				</div>
 			</div>

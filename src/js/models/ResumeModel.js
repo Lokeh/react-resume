@@ -3,11 +3,11 @@ const EventEmitter = require('events');
 const assign = require('object-assign');
 const CHANGE_EVENT = 'change';
 
-let _store = Immutable.Map({});
+let _Model = Immutable.Map({});
 
-const ResumeStore = assign({}, EventEmitter.prototype, {
+const ResumeModel = assign({}, EventEmitter.prototype, {
 	getAll() {
-		return _store;
+		return _Model;
 	},
 	emitChange() {
 		this.emit(CHANGE_EVENT);
@@ -18,17 +18,17 @@ const ResumeStore = assign({}, EventEmitter.prototype, {
 	removeChangeListener(cb) {
 		this.removeListener(CHANGE_EVENT, cb);
 	},
-	new(newStore) {
-		_store = newStore;
+	new(newModel) {
+		_Model = newModel;
 		this.emitChange();
 	},
 	setIn(path, value) {
-		_store = _store.setIn(path, value);
+		_Model = _Model.setIn(path, value);
 		this.emitChange();
 	},
 	deleteIn(path) {
-		this.new(_store.deleteIn(path));
+		this.new(_Model.deleteIn(path));
 	}
 });
 
-module.exports = ResumeStore;
+module.exports = ResumeModel;

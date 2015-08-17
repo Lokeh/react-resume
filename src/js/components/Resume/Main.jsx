@@ -4,7 +4,7 @@ const Immutable = require('immutable');
 const {Map, List} = Immutable;
 
 const getResumeJSON = require('../../libs/getResumeJSON');
-const ResumeStore = require('../../stores/ResumeStore');
+const ResumeModel = require('../../models/ResumeModel');
 React.initializeTouchEvents(true);
 
 
@@ -32,19 +32,18 @@ const Resume = React.createClass({
 			muiTheme: ThemeManager.getCurrentTheme()
 		};
 	},
-	componentWillMount() {
-		ThemeManager.setPalette({
-			accent1Color: Colors.deepOrange500
-		});
-	},
 	getInitialState() {
-		return { resume: ResumeStore.getAll() };
+		return { resume: ResumeModel.getAll() };
 	},
 	_onChange() {
-		this.setState({ resume: ResumeStore.getAll() });
+		this.setState({ resume: ResumeModel.getAll() });
 	},
 	componentWillMount() {
-		ResumeStore.addChangeListener(this._onChange);
+		console.log('hi');
+		ResumeModel.addChangeListener(this._onChange);
+		ThemeManager.setPalette({
+			primary1Color: "#2C3E50"
+		});
 	},
 	render() {
 		if (this.state.resume.size === 0) return (<div></div>);
