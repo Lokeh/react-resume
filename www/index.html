@@ -1,6 +1,7 @@
 <html>
 	<head>
 		<link href='http://fonts.googleapis.com/css?family=Roboto:400,300,500' rel='stylesheet' type='text/css'>
+		<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,700' rel='stylesheet' type='text/css'>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 		<script src="../dist/js/libs.js"></script>
 		<style>
@@ -9,8 +10,41 @@
 			width: 50%;
 			min-width: 200px;
 			overflow: scroll;
+			overflow-y: scroll;
 			background: #282828;
 			color: #F8F8F2;
+			font-family: "Source Code Pro", monospace;
+			height: 100%;
+		}
+
+		.editor a {
+			color: #FD971F;
+		}
+
+		.editor input[type="text"] {
+			font-family: "Source Code Pro", monospace;
+			background: #282828;
+			border: 0;
+			color: #E6DB74;
+			word-break: break-word;
+		}
+
+		.editor textarea {
+			font-family: "Source Code Pro", monospace;
+			background: #282828;
+			border: 0;
+			color: #E6DB74;
+		}
+
+		.input {
+			font-family: "Source Code Pro", monospace;
+			color: #E6DB74;
+			font-size: 11px;			
+		}
+
+		.display {
+			overflow: scroll;
+			height: 100%;
 		}
 
 		body {
