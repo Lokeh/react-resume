@@ -23,16 +23,24 @@ const HistoryModel = assign({}, EventEmitter.prototype, {
 		this.emitChange();
 	},
 	push(value) {
-		if (value !== _history.last()) {
+		if (!_history.includes(value)) {
 			_history = _history.push(value);
 			this.emitChange();
 		}
 	},
 	pop() {
 		const last = _history.last();
-		_history = history.pop();
+		_history = _history.pop();
 		this.emitChange();
 		return last;
+	},
+	splice(newSize, ...items) {
+		// truncates the array and then appends an item to the end
+		_history = _history.setSize(newSize).push(...items);
+		this.emitChange();
+	},
+	get(index) {
+		return _history.get(index);
 	}
 });
 
