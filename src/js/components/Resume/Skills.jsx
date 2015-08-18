@@ -10,7 +10,7 @@ const CardText = mui.CardText;
 
 const Skills = React.createClass({
 	render() {
-		if (this.props.info.size === 0) return (<div></div>);
+		if (!this.props.info || this.props.info.size === 0) return (<div></div>);
 		const singleItem = this.props.info.size === 1 ? true : false;
 		return (
 			<div>

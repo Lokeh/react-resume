@@ -10,7 +10,7 @@ const CardText = mui.CardText;
 
 const Publications = React.createClass({
 	render() {
-		if (this.props.info.size === 0) return (<div></div>);
+		if (!this.props.info || this.props.info.size === 0) return (<div></div>);
 		const singleItem = this.props.info.size === 1 ? true : false;
 		return (
 			<div>
@@ -18,7 +18,7 @@ const Publications = React.createClass({
 					<CardTitle title="Publications" />
 					{this.props.info.map((publication, key) => (
 						<Card key={key} expandable style={{width: "95%", margin: "0 auto 16px"}} initiallyExpanded={singleItem}>
-							<CardTitle showExpandableButton><strong>{publication.get('name')}</strong></CardTitle>
+							<CardTitle showExpandableButton><h2 style={{margin: "0"}}>{publication.get('name')}</h2></CardTitle>
 							<CardText expandable>
 								<div>{publication.get('publisher')}</div>
 								<div>{publication.get('releaseDate')}</div>

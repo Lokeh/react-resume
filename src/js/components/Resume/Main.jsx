@@ -13,6 +13,7 @@ const mui = require('material-ui');
 const ThemeManager = new mui.Styles.ThemeManager();
 const Colors = mui.Styles.Colors;
 const AppBar = mui.AppBar;
+const Snackbar = mui.Snackbar;
 
 // components
 const Basics = require('./Basics.jsx');
@@ -51,7 +52,7 @@ const Resume = React.createClass({
 				iconClassNameLeft="fa fa-pencil"
 				onLeftIconButtonTouchTap={this.props.onAppBarTouch}
 				title="My Resume"
-				zDepth={0}
+				zDepth={1}
 			/>
 			<div style={{padding: "25px", maxWidth: "800px"}}>
 				<Basics info={this.state.resume.get('basics')}/>
@@ -62,6 +63,12 @@ const Resume = React.createClass({
 				<Awards info={this.state.resume.get('awards')} />
 				<Publications info={this.state.resume.get('publications')} />
 			</div>
+			<Snackbar
+				message="Event added to your calendar"
+				action="undo"
+				autoHideDuration={this.state.autoHideDuration}
+				openOnMount
+			/>
 		</div>);
 	}
 });
