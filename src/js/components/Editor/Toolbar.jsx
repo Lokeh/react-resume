@@ -1,5 +1,6 @@
 // Toolbar
 const React = require('react');
+const fs = require('../../libs/FileSaver');
 
 // Material UI
 const mui = require('material-ui');
@@ -33,13 +34,18 @@ const EditorToolBar = React.createClass({
 			HistoryModel.decOffset();
 			ResumeModel.new(HistoryModel.get(HistoryModel.getAll().offset));
 	},
+	save() {
+		const blob = new Blob([JSON.stringify(ResumeModel.getAll().toJS())], {type: "application/json;charset=utf-8"});
+		fs.saveAs(blob, "resume.json");
+	},
 	render() {
 		// const cantUndo = (this.state.size) === this.state.offset;
 		// const cantRedo = this.state.offset > this.state.size || this.state.offset === 1;
 		return (
 			<div>
-					<div style={{marginTop: "5px"}}><RaisedButton label="UNDO" primary onClick={this.undo} /></div>
-					<div style={{marginTop: "5px"}}><RaisedButton label="REDO" secondary onClick={this.redo} /></div>
+				<div style={{marginTop: "5px"}}><RaisedButton label="UNDO" primary onClick={this.undo} /></div>
+				<div style={{marginTop: "5px"}}><RaisedButton label="REDO" secondary onClick={this.redo} /></div>
+				<div style={{marginTop: "5px"}}><RaisedButton label="SAVE" onClick={this.save} /></div>		
 			</div>
 		);
 	}

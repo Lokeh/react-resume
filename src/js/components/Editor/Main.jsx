@@ -27,9 +27,6 @@ const Editor = React.createClass({
 			.then((resume) => ResumeModel.new(Immutable.fromJS(resume)))
 			.catch((err) => console.error(err));
 	},
-	_onClick() {
-		console.log(HistoryModel.getAll().toJS());
-	},
 	render() {
 		return (
 			<div style={{margin: "5px 10px"}}>
@@ -37,7 +34,6 @@ const Editor = React.createClass({
 					<Toolbar />
 				</div>
 				<Entry value={this.state.resume} keyName="resume" path="" minEditDepth={0} minRemovalDepth={1} />
-				<button onClick={this._onClick}>History</button>
 			</div>
 		);
 	}
