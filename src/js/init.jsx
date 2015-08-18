@@ -47,7 +47,7 @@ const App = React.createClass({
 		return (
 			<div>
 				<div className="editor" style={{display: hidden}}>
-					<Editor data={this.state.resume} />
+					<Editor data={this.state.resume} saveFn={ResumeModel.setIn.bind(ResumeModel)} deleteFn={ResumeModel.deleteIn.bind(ResumeModel)} />
 				</div>
 				<div className="display" style={{float: "left", width: width}}>
 					<Resume data={this.state.resume} onAppBarTouch={this.toggleEditor} />
