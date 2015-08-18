@@ -32,7 +32,18 @@ const Entry = React.createClass({
 		return _path;
 	},
 	_onChange(e) {
+		// resize the input on change
+		e.target.size = e.target.value.length;
+	},
+	_onBlur(e) {
+		// update the model on blur
 		ResumeModel.setIn(this.parsePath(this.props.path), e.target.value);
+	},
+	_onKeyUp(e) {
+		// update the model on enter
+		if (e.key === "Enter") {
+			ResumeModel.setIn(this.parsePath(this.props.path), e.target.value);
+		}
 	},
 	deletePath(e) {
 		e.preventDefault();
@@ -71,7 +82,14 @@ const Entry = React.createClass({
 							{(isMinEditDepth) ? <AddListEntry path={this.props.path} /> : ''}
 						{']'}</span>) :
 					(<span className="input">
-						"<input type="text" value={value} onChange={this._onChange} size={value.length} />" <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a>
+						"<input
+							type="text"
+							defaultValue={value}
+							onChange={this._onChange}
+							onBlur={this._onBlur}
+							onKeyUp={this._onKeyUp}
+							size={value.length}
+						/>" <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a>
 					</span>)))
 				}
 				</div>

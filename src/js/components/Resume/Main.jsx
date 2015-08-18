@@ -53,8 +53,9 @@ const Resume = React.createClass({
 				onLeftIconButtonTouchTap={this.props.onAppBarTouch}
 				title="My Resume"
 				zDepth={1}
+				style={{position: "fixed"}}
 			/>
-			<div style={{padding: "25px", maxWidth: "800px"}}>
+			<div style={{padding: "64px 25px 25px", maxWidth: "800px"}}>
 				<Basics info={this.state.resume.get('basics')}/>
 				<Work info={this.state.resume.get('work')} />
 				<Skills info={this.state.resume.get('skills')} />
@@ -64,9 +65,7 @@ const Resume = React.createClass({
 				<Publications info={this.state.resume.get('publications')} />
 			</div>
 			<Snackbar
-				message="Event added to your calendar"
-				action="undo"
-				autoHideDuration={this.state.autoHideDuration}
+				message="Click on the pencil icon in the upper-right corner to edit"
 				openOnMount
 			/>
 		</div>);

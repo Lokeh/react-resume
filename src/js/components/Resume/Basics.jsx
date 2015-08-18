@@ -26,7 +26,7 @@ const Basics = React.createClass({
 						(<mui.IconButton key={v.get('network')} iconClassName={`fa fa-${v.get('network').toLowerCase()}`} tooltip={v.get('network')} tooltipPosition="top-center" />)
 					)}
 				</div>
-				<h1>{basicInfo.get('name')}<small>{basicInfo.get('label')}</small></h1>
+				<h1 style={{fontSize: "3em"}}>{basicInfo.get('name')}<small>{basicInfo.get('label')}</small></h1>
 				<ClearFix />
 				{(() => {
 					const location = basicInfo.get('location');
