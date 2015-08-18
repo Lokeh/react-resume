@@ -3,11 +3,14 @@ const EventEmitter = require('events');
 const assign = require('object-assign');
 const CHANGE_EVENT = 'change';
 
-let _history = Immutable.List([]);
+let _model = {
+	history: Immutable.List([]),
+	offset: 1
+};
 
 const HistoryModel = assign({}, EventEmitter.prototype, {
 	getAll() {
-		return _history;
+		return _model;
 	},
 	emitChange() {
 		this.emit(CHANGE_EVENT);
@@ -19,28 +22,38 @@ const HistoryModel = assign({}, EventEmitter.prototype, {
 		this.removeListener(CHANGE_EVENT, cb);
 	},
 	new(newModel) {
-		_history = newModel;
+		_model = newModel;
 		this.emitChange();
 	},
 	push(value) {
-		if (!_history.includes(value)) {
-			_history = _history.push(value);
+		if (!_model.history.includes(value)) {
+			_model.history = _model.history.skipLast(_model.offset-1).push(value);
+			_model.offset = 1;
 			this.emitChange();
 		}
 	},
 	pop() {
-		const last = _history.last();
-		_history = _history.pop();
+		const last = _model.last();
+		_model.history = _model.history.pop();
 		this.emitChange();
 		return last;
 	},
-	splice(newSize, ...items) {
-		// truncates the array and then appends an item to the end
-		_history = _history.setSize(newSize).push(...items);
-		this.emitChange();
+	get() {
+		return _model.history.get(_model.history.size-_model.offset);
 	},
-	get(index) {
-		return _history.get(index);
+	setOffset(offset) {
+		_model.offset = offset;
+	},
+	decOffset() {
+		if (_model.offset !== 1) {
+			_model.offset = _model.offset - 1;
+		}
+	},
+	incOffset() {
+		// console.log(_model.offset);
+		if (_model.offset !== _model.history.size) {
+			_model.offset = _model.offset + 1;
+		}
 	}
 });
 

@@ -23,7 +23,8 @@ const Entry = React.createClass({
 	},
 	getInitialState() {
 		return {
-			collapsed: false
+			collapsed: false,
+			inputValue: ""
 		};
 	},
 	parsePath(path) {
@@ -32,17 +33,16 @@ const Entry = React.createClass({
 		return _path;
 	},
 	_onChange(e) {
-		// resize the input on change
-		e.target.size = e.target.value.length || 1;
+		this.setState({ inputValue: e.target.value });
 	},
 	_onBlur(e) {
 		// update the model on blur
-		ResumeModel.setIn(this.parsePath(this.props.path), e.target.value);
+		ResumeModel.setIn(this.parsePath(this.props.path), this.state.inputValue);
 	},
 	_onKeyUp(e) {
 		// update the model on enter
 		if (e.key === "Enter") {
-			ResumeModel.setIn(this.parsePath(this.props.path), e.target.value);
+			ResumeModel.setIn(this.parsePath(this.props.path), this.state.inputValue);
 		}
 	},
 	deletePath(e) {
@@ -53,12 +53,14 @@ const Entry = React.createClass({
 		e.preventDefault();
 		this.setState({ collapsed: !this.state.collapsed });
 	},
+	componentWillMount() {
+		this.setState({ inputValue: this.props.value });
+	},
+	componentWillReceiveProps(nextProps) {
+		this.setState({ inputValue: nextProps.value });
+	},
 	shouldComponentUpdate(nextProps, nextState) {
-		if (this.props.value !== nextProps.value || this.state.collapsed !== nextState.collapsed) {
-			console.log(nextProps.path);
-			return true;
-		}
-		return false;
+		return this.props.value !== nextProps.value || this.state.collapsed !== nextState.collapsed || this.state.inputValue !== nextState.inputValue
 	},
 	render() {
 		const value = this.props.value;
@@ -88,11 +90,11 @@ const Entry = React.createClass({
 					(<span className="input">
 						"<input
 							type="text"
-							defaultValue={value}
+							value={this.state.inputValue}
 							onChange={this._onChange}
 							onBlur={this._onBlur}
 							onKeyUp={this._onKeyUp}
-							size={value.length}
+							size={this.state.inputValue.length}
 						/>" <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a>
 					</span>)))
 				}

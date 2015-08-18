@@ -19,45 +19,27 @@ const EditorToolBar = React.createClass({
 			muiTheme: ThemeManager.getCurrentTheme()
 		};
 	},
-	getInitialState() {
-		return {
-			index: 1,
-			size: 0
-		};
-	},
 	_onChange() {
-		this.setState({ size: HistoryModel.getAll().size })
+		this.setState({ size: HistoryModel.getAll().history.size })
 	},
 	componentWillMount() {
 		HistoryModel.addChangeListener(this._onChange);
 	},
 	undo() {
-		console.log(HistoryModel.get(this.state.size-this.state.index).toJS().basics.name);
-		ResumeModel.new(HistoryModel.get(this.state.size-this.state.index-1))
-		this.setState({ index: this.state.index + 1 });
+			HistoryModel.incOffset();
+			ResumeModel.new(HistoryModel.get(HistoryModel.getAll().offset));
 	},
 	redo() {
-		console.log(HistoryModel.get(this.state.size-this.state.index).toJS().basics.name);
-		ResumeModel.new(HistoryModel.get(this.state.size-this.state.index+1))
-		this.setState({ index: this.state.index - 1 });
+			HistoryModel.decOffset();
+			ResumeModel.new(HistoryModel.get(HistoryModel.getAll().offset));
 	},
 	render() {
-		const cantUndo = (this.state.size) === this.state.index;
-		const cantRedo = this.state.index > this.state.size || this.state.index === 1;
+		// const cantUndo = (this.state.size) === this.state.offset;
+		// const cantRedo = this.state.offset > this.state.size || this.state.offset === 1;
 		return (
 			<div>
-					<div style={{marginTop: "5px"}}><RaisedButton label="UNDO" primary onClick={this.undo} disabled={cantUndo} /></div>
-					<div style={{marginTop: "5px"}}><RaisedButton label="REDO" secondary onClick={this.redo} disabled={cantRedo} /></div>
-					<div style={{marginTop: "5px"}}>
-						<RaisedButton
-							label="CURRENT"
-							onClick={()=> console.log(
-								HistoryModel.getAll().toJS(),
-								this.state,
-								HistoryModel.get(this.state.size-this.state.index).toJS().basics.name
-								)}
-						/>
-					</div>
+					<div style={{marginTop: "5px"}}><RaisedButton label="UNDO" primary onClick={this.undo} /></div>
+					<div style={{marginTop: "5px"}}><RaisedButton label="REDO" secondary onClick={this.redo} /></div>
 			</div>
 		);
 	}
