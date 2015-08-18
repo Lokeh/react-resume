@@ -33,7 +33,7 @@ const Entry = React.createClass({
 	},
 	_onChange(e) {
 		// resize the input on change
-		e.target.size = e.target.value.length;
+		e.target.size = e.target.value.length || 1;
 	},
 	_onBlur(e) {
 		// update the model on blur
@@ -54,7 +54,11 @@ const Entry = React.createClass({
 		this.setState({ collapsed: !this.state.collapsed });
 	},
 	shouldComponentUpdate(nextProps, nextState) {
-		return this.props.value !== nextProps.value || this.state.collapsed !== nextState.collapsed;
+		if (this.props.value !== nextProps.value || this.state.collapsed !== nextState.collapsed) {
+			console.log(nextProps.path);
+			return true;
+		}
+		return false;
 	},
 	render() {
 		const value = this.props.value;
