@@ -18,6 +18,8 @@ const Entry = React.createClass({
 			React.PropTypes.string
 		]).isRequired,
 		path: React.PropTypes.string.isRequired
+		minEditDepth: React.PropTypes.number,
+		minRemovalDepth: React.PropTypes.number
 	},
 	parsePath(path) {
 		const _path = path.split('.')
@@ -29,7 +31,6 @@ const Entry = React.createClass({
 	},
 	deletePath(e) {
 		e.preventDefault();
-		console.log(this.parsePath(this.props.path));
 		ResumeModel.deleteIn(this.parsePath(this.props.path));
 	},
 	shouldComponentUpdate(nextProps) {

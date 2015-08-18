@@ -1,9 +1,9 @@
 {
   "basics": {
-    "name": "Will Acton",
-    "label": "Front End Developer",
+    "name": "",
+    "label": "Programmer",
     "picture": "",
-    "email": "hello@willacton.com",
+    "email": "",
     "phone": "(912) 555-4321",
     "website": "http://richardhendricks.com",
     "summary": "Richard hails from Tulsa. He has earned degrees from the University of Oklahoma and Stanford. (Go Sooners and Cardinals!) Before starting Pied Piper, he worked for Hooli as a part time software developer. While his work focuses on applied information theory, mostly optimizing lossless compression schema of both the length-limited and adaptive variants, his non-work interests range widely, everything from quantum computing to chaos theory. He could tell you about it, but THAT would NOT be a “length-limited” conversation!",
@@ -17,13 +17,13 @@
     "profiles": [
       {
         "network": "Twitter",
-        "username": "lilactown_",
+        "username": "neutralthoughts",
         "url": ""
       },
       {
-        "network": "GitHub",
-        "username": "Lokeh",
-        "url": ""
+        "network": "SoundCloud",
+        "username": "dandymusicnl",
+        "url": "https://soundcloud.com/dandymusicnl"
       }
     ]
   },
@@ -40,14 +40,6 @@
         "Successfully won Techcrunch Disrupt",
         "Optimized an algorithm that holds the current world record for Weisman Scores"
       ]
-    },
-    {
-      "company": "Cambia Health Solutions",
-      "position": "Front End Developer",
-      "startDate": "2014-09-03",
-      "endDate": "Present",
-      "summary": "blah",
-      "highlights": []
     }
   ],
   "volunteer": [
@@ -112,10 +104,6 @@
         "MP4",
         "GIF"
       ]
-    },
-    {
-      "name": "Test",
-      "level": "Beginner"
     }
   ],
   "languages": [
