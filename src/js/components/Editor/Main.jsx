@@ -23,8 +23,14 @@ const Editor = React.createClass({
 	},
 	componentWillMount() {
 		ResumeModel.addChangeListener(this._onChange);
+		const order = ['basics', 'skills', 'work', 'education', 'volunteer', 'awards', 'publications', 'languages', 'interests', 'references']
 		getResumeJSON()
-			.then((resume) => ResumeModel.new(Immutable.fromJS(resume)))
+			.then((resume) => {
+				ResumeModel.new(Immutable.fromJS(resume).sortBy(
+					(value, key) => key,
+					(a, b) => order.indexOf(a) - order.indexOf(b)
+				));
+			})
 			.catch((err) => console.error(err));
 	},
 	render() {
