@@ -17,9 +17,14 @@ const Entry = React.createClass({
 			React.PropTypes.instanceOf(Map),
 			React.PropTypes.string
 		]).isRequired,
-		path: React.PropTypes.string.isRequired
+		path: React.PropTypes.string.isRequired,
 		minEditDepth: React.PropTypes.number,
 		minRemovalDepth: React.PropTypes.number
+	},
+	getInitialState() {
+		return {
+			collapsed: false
+		};
 	},
 	parsePath(path) {
 		const _path = path.split('.')
@@ -33,37 +38,57 @@ const Entry = React.createClass({
 		e.preventDefault();
 		ResumeModel.deleteIn(this.parsePath(this.props.path));
 	},
-	shouldComponentUpdate(nextProps) {
-		return this.props.value !== nextProps.value;
+	toggleCollapsed(e) {
+		e.preventDefault();
+		this.setState({ collapsed: !this.state.collapsed });
+	},
+	shouldComponentUpdate(nextProps, nextState) {
+		return this.props.value !== nextProps.value || this.state.collapsed !== nextState.collapsed;
 	},
 	render() {
 		const value = this.props.value;
-		const isMinEditDepth = this.parsePath(this.props.path).length > this.props.minEditDepth;
 		const isMinRemovalDepth = this.parsePath(this.props.path).length > this.props.minRemovalDepth;
-		return (
-			<div style={{marginLeft: "20px"}}>
-			{this.props.keyName}:{' '}
-			{
-				(Map.isMap(value) ?
-					(<span>{'{'} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a> : '' }
-						{value.map((v, k) => {
-							return (<Entry key={k} value={v} keyName={k} path={this.props.path+k+'.'} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
-						}).toList()}
-						{(isMinEditDepth) ? <AddMapEntry path={this.props.path} /> : ''}
-					{'}'}</span>) :
-				(List.isList(value) ?
-					(<span>{'['} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a> : '' }
-						{value.map((v, k) => {
-							return (<Entry key={k} value={v} keyName={k} path={this.props.path+k+'.'} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
-						}).toList()} 
-						{(isMinEditDepth) ? <AddListEntry path={this.props.path} /> : ''}
-					{']'}</span>) :
-				(<span className="input">
-					"<input type="text" value={value} onChange={this._onChange} size={value.length} />" <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a>
-				</span>)))
-			}
-			</div>
-		);
+		const isMap = Map.isMap(value);
+		const isList = List.isList(value)
+		if (this.state.collapsed === false) {
+			const isMinEditDepth = this.parsePath(this.props.path).length > this.props.minEditDepth;
+			return (
+				<div style={{marginLeft: "20px"}}>
+				{(isMap || isList) ? <a onClick={this.toggleCollapsed}><i className="fa fa-minus-square" style={{color: "#FFD569", marginLeft: '-24px'}} /></a> : '' } {this.props.keyName}:{' '}
+				{
+					(isMap ?
+						(<span>{'{'} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a> : '' }
+							{value.map((v, k) => {
+								return (<Entry key={k} value={v} keyName={k} path={this.props.path+k+'.'} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
+							}).toList()}
+							{(isMinEditDepth) ? <AddMapEntry path={this.props.path} /> : ''}
+						{'}'}</span>) :
+					(isList ?
+						(<span>{'['} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a> : '' }
+							{value.map((v, k) => {
+								return (<Entry key={k} value={v} keyName={k} path={this.props.path+k+'.'} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
+							}).toList()} 
+							{(isMinEditDepth) ? <AddListEntry path={this.props.path} /> : ''}
+						{']'}</span>) :
+					(<span className="input">
+						"<input type="text" value={value} onChange={this._onChange} size={value.length} />" <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a>
+					</span>)))
+				}
+				</div>
+			);
+		}
+		else {
+			return (
+				<div style={{marginLeft: "20px"}}>
+					<a onClick={this.toggleCollapsed}>
+						<i className="fa fa-plus-square" style={{color: "#FFD569", marginLeft: "-24px"}} />
+					</a> {this.props.keyName}
+					{(isMap ? ': { ' : ': [ ')}
+					{(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a> : '' }
+					{(isMap ? ' }' : ' ]')}
+				</div>
+			);
+		}
 	}
 });
 

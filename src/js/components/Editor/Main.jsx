@@ -25,7 +25,7 @@ const Editor = React.createClass({
 	},
 	render() {
 		return (
-			<div>
+			<div style={{margin: "5px 10px"}}>
 				<Entry value={this.state.resume} keyName="resume" path="" minEditDepth={0} minRemovalDepth={1} />
 			</div>
 		);

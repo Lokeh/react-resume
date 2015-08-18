@@ -50,7 +50,7 @@ const AddMapEntry = React.createClass({
 				</div>
 			);
 		}
-		return (<div><a href="#"><i onClick={this.toggleOptions} className="fa fa-plus-circle add" /></a></div>);
+		return (<div><a href="#"><i onClick={this.toggleOptions} className="fa fa-plus-circle add" style={{marginLeft: "19px"}} /></a></div>);
 	}
 });
 
