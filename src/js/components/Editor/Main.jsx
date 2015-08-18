@@ -1,37 +1,14 @@
 // Top-level component
 const React = require('react');
-const Immutable = require('immutable');
-const {List, Map} = Immutable;
 
-const getResumeJSON = require('../../libs/getResumeJSON');
-const ResumeModel = require('../../models/ResumeModel');
 const HistoryModel = require('../../models/HistoryModel');
 
 const Entry = require('./Entry.jsx');
 const Toolbar = require('./Toolbar.jsx');
 
 const Editor = React.createClass({
-	getInitialState() {
-		return {
-			resume: ResumeModel.getAll()
-		};
-	},
-	_onChange() {
-		const resume = ResumeModel.getAll();
-		this.setState({ resume });
-		HistoryModel.push(resume);
-	},
-	componentWillMount() {
-		ResumeModel.addChangeListener(this._onChange);
-		const order = ['basics', 'skills', 'work', 'education', 'volunteer', 'awards', 'publications', 'languages', 'interests', 'references']
-		getResumeJSON()
-			.then((resume) => {
-				ResumeModel.new(Immutable.fromJS(resume).sortBy(
-					(value, key) => key,
-					(a, b) => order.indexOf(a) - order.indexOf(b)
-				));
-			})
-			.catch((err) => console.error(err));
+	componentWillReceiveProps(nextProps) {
+		HistoryModel.push(nextProps.data);
 	},
 	render() {
 		return (
@@ -39,7 +16,7 @@ const Editor = React.createClass({
 				<div id="toolbar">
 					<Toolbar />
 				</div>
-				<Entry value={this.state.resume} keyName="resume" path="" minEditDepth={0} minRemovalDepth={1} />
+				<Entry value={this.props.data} keyName="resume" path="" minEditDepth={0} minRemovalDepth={1} />
 			</div>
 		);
 	}

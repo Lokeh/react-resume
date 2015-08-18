@@ -33,20 +33,13 @@ const Resume = React.createClass({
 			muiTheme: ThemeManager.getCurrentTheme()
 		};
 	},
-	getInitialState() {
-		return { resume: ResumeModel.getAll() };
-	},
-	_onChange() {
-		this.setState({ resume: ResumeModel.getAll() });
-	},
 	componentWillMount() {
-		ResumeModel.addChangeListener(this._onChange);
 		ThemeManager.setPalette({
 			primary1Color: "#2C3E50"
 		});
 	},
 	render() {
-		if (this.state.resume.size === 0) return (<div></div>);
+		if (this.props.data.size === 0) return (<div></div>);
 		return(<div>
 			<AppBar
 				iconClassNameLeft="fa fa-pencil"
@@ -56,13 +49,13 @@ const Resume = React.createClass({
 				style={{position: "fixed"}}
 			/>
 			<div style={{padding: "64px 25px 25px", maxWidth: "800px"}}>
-				<Basics info={this.state.resume.get('basics')}/>
-				<Work info={this.state.resume.get('work')} />
-				<Skills info={this.state.resume.get('skills')} />
-				<Volunteer info={this.state.resume.get('volunteer')} />
-				<Education info={this.state.resume.get('education')} />
-				<Awards info={this.state.resume.get('awards')} />
-				<Publications info={this.state.resume.get('publications')} />
+				<Basics info={this.props.data.get('basics')}/>
+				<Work info={this.props.data.get('work')} />
+				<Skills info={this.props.data.get('skills')} />
+				<Volunteer info={this.props.data.get('volunteer')} />
+				<Education info={this.props.data.get('education')} />
+				<Awards info={this.props.data.get('awards')} />
+				<Publications info={this.props.data.get('publications')} />
 			</div>
 			<Snackbar
 				message="Click on the pencil icon in the upper-right corner to edit"
