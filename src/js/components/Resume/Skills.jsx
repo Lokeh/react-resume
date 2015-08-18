@@ -7,6 +7,10 @@ const Paper = mui.Paper;
 const Card = mui.Card;
 const CardTitle = mui.CardTitle;
 const CardText = mui.CardText;
+const CardActions = mui.CardActions;
+const FlatButton = mui.FlatButton;
+const CardHeader = mui.CardHeader;
+const Avatar = mui.Avatar;
 
 const Skills = React.createClass({
 	render() {
@@ -16,19 +20,17 @@ const Skills = React.createClass({
 			<div>
 				<Card initiallyExpanded zDepth={0}>
 					<CardTitle title="Skills" />
-					<div style={{float: "left", width: "95%", margin: "0 2.5%"}}>
+					<div style={{width: "95%", margin: "0 2.5%"}}>
 					{this.props.info.map((Skill, key) => (
-						<div key={key} className="skill">
+						<div key={key} style={{marginBottom: "20px"}}>
 							<Card initiallyExpanded>
-								<CardTitle><strong>{Skill.get('name')}</strong></CardTitle>
-								<CardText expandable>
-									<div>Level: {Skill.get('level')}</div>
-									{Skill.get('keywords') ? (<div style={{marginTop: "15px"}}>
-										{Skill.get('keywords').map((word, key) => 
-											(<span key={key} style={{color:"#aaa"}}>{word} </span>)
-										)}
-									</div>) : '' }
-								</CardText>
+								<CardHeader avatar={<Avatar>{Skill.get('level')[0]}</Avatar>} title={Skill.get('name')} subtitle={Skill.get('level')} style={{fontSize: "16px"}}>
+									<div style={{float: "right"}}>
+										{Skill.get('keywords') ? Skill.get('keywords').map((word, key) => 
+											(<FlatButton key={key} style={{color:"#aaa", cursor: "default"}} label={word} />)
+										) : '' }
+									</div>
+								</CardHeader>
 							</Card>
 						</div>
 					))}
