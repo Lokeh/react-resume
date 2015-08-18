@@ -48,6 +48,7 @@ const Resume = React.createClass({
 		if (this.state.resume.size === 0) return (<div></div>);
 		return(<div>
 			<AppBar
+				iconClassNameLeft="fa fa-pencil"
 				onLeftIconButtonTouchTap={this.props.onAppBarTouch}
 				title="My Resume"
 				zDepth={0}
