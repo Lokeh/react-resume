@@ -20,7 +20,8 @@ const Entry = React.createClass({
 		minEditDepth: React.PropTypes.number,
 		minRemovalDepth: React.PropTypes.number,
 		saveFn: React.PropTypes.func.isRequired,
-		deleteFn: React.PropTypes.func.isRequired
+		deleteFn: React.PropTypes.func.isRequired,
+		getFn: React.PropTypes.func.isRequired
 	},
 	getInitialState() {
 		return {
@@ -80,16 +81,16 @@ const Entry = React.createClass({
 					(isMap ?
 						(<span>{'{'} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a> : '' }
 							{value.map((v, k) => {
-								return (<Entry saveFn={this.props.saveFn} deleteFn={this.props.deleteFn} key={k} value={v} keyName={k} path={this.props.path+k+'.'} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
+								return (<Entry saveFn={this.props.saveFn} deleteFn={this.props.deleteFn} getFn={this.props.getFn} key={k} value={v} keyName={k} path={this.props.path+k+'.'} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
 							}).toList()}
-							{(isMinEditDepth) ? <AddMapEntry path={this.props.path} /> : ''}
+							{(isMinEditDepth) ? <AddMapEntry saveFn={this.props.saveFn} path={this.props.path} /> : ''}
 						{'}'}</span>) :
 					(isList ?
 						(<span>{'['} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a> : '' }
 							{value.map((v, k) => {
-								return (<Entry saveFn={this.props.saveFn} deleteFn={this.props.deleteFn} key={k} value={v} keyName={k} path={this.props.path+k+'.'} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
+								return (<Entry saveFn={this.props.saveFn} deleteFn={this.props.deleteFn} getFn={this.props.getFn} key={k} value={v} keyName={k} path={this.props.path+k+'.'} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
 							}).toList()} 
-							{(isMinEditDepth) ? <AddListEntry path={this.props.path} /> : ''}
+							{(isMinEditDepth) ? <AddListEntry path={this.props.path} saveFn={this.props.saveFn} getFn={this.props.getFn} /> : ''}
 						{']'}</span>) :
 					(<span className="input">
 						"<input

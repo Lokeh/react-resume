@@ -9,7 +9,8 @@ const Toolbar = require('./Toolbar.jsx');
 const Editor = React.createClass({
 	propTypes: {
 		saveFn: React.PropTypes.func.isRequired,
-		deleteFn: React.PropTypes.func.isRequired
+		deleteFn: React.PropTypes.func.isRequired,
+		getFn: React.PropTypes.func.isRequired
 	},
 	componentWillReceiveProps(nextProps) {
 		HistoryModel.push(nextProps.data);
@@ -23,7 +24,7 @@ const Editor = React.createClass({
 				<div id="toolbar">
 					<Toolbar />
 				</div>
-				<Entry value={this.props.data} saveFn={this.props.saveFn} deleteFn={this.props.deleteFn} keyName="resume" path="" minEditDepth={0} minRemovalDepth={1} />
+				<Entry value={this.props.data} saveFn={this.props.saveFn} deleteFn={this.props.deleteFn} getFn={this.props.getFn} keyName="resume" path="" minEditDepth={0} minRemovalDepth={1} />
 			</div>
 		);
 	}
