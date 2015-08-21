@@ -1,10 +1,10 @@
 // get resume
 const Promise = require('bluebird');
 
-function getResumeJSON() {
+function getResumeJSON(url) {
 	return new Promise((resolve, reject) => {
 		const xhr = new XMLHttpRequest();
-		xhr.open('get', '../json/resume.json');
+		xhr.open('get', url);
 
 		xhr.onload = () => {
 			if (xhr.status === 200) {

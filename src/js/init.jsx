@@ -16,6 +16,9 @@ const Resume = require('./components/Resume');
 const Editor = require('./components/Editor');
 
 const App = React.createClass({
+	propTypes: {
+		json: React.PropTypes.string.isRequired
+	},
 	getInitialState() {
 		return {
 			showEditor: false,
@@ -32,7 +35,7 @@ const App = React.createClass({
 	componentWillMount() {
 		ResumeModel.addChangeListener(this._onChange);
 		const order = ['basics', 'skills', 'work', 'education', 'volunteer', 'awards', 'publications', 'languages', 'interests', 'references']
-		getResumeJSON()
+		getResumeJSON(this.props.json)
 			.then((resume) => {
 				ResumeModel.new(Immutable.fromJS(resume).sortBy(
 					(value, key) => key,
@@ -62,4 +65,4 @@ const App = React.createClass({
 	}
 });
 
-React.render(<App />, document.getElementById('app'));
+window.ResumeInit = (url) => React.render(<App json={url} />, document.getElementById('app'));
