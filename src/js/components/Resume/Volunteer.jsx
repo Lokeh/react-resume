@@ -26,10 +26,10 @@ const Volunteer = React.createClass({
 							<CardText expandable>
 								{volunteer.get('summary')}
 							</CardText>
-							{volunteer.get('highlights').size ? <CardText expandable>
+							{volunteer.has('highlights') ? <CardText expandable>
 								Highlights:
 								<ul>
-									{volunteer.get('highlights') ? volunteer.get('highlights').map((highlight, key) => (<li key={key}>{highlight}</li>)) : ''}
+									{volunteer.get('highlights').size ? volunteer.get('highlights').map((highlight, key) => (<li key={key}>{highlight}</li>)) : ''}
 								</ul>
 							</CardText> : ''}
 						</Card>

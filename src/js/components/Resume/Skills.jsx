@@ -21,12 +21,12 @@ const Skills = React.createClass({
 				<Card initiallyExpanded zDepth={0}>
 					<CardTitle title="Skills" />
 					<div style={{width: "95%", margin: "0 2.5%"}}>
-					{this.props.info.map((Skill, key) => (
+					{this.props.info.map((skill, key) => (
 						<div key={key} style={{marginBottom: "20px"}}>
 							<Card initiallyExpanded>
-								<CardHeader avatar={<Avatar>{Skill.get('level')[0]}</Avatar>} title={Skill.get('name')} subtitle={Skill.get('level')} style={{fontSize: "16px"}}>
+								<CardHeader avatar={<Avatar>{skill.has('level') ? skill.get('level')[0] : ''}</Avatar>} title={skill.get('name')} subtitle={skill.get('level')} style={{fontSize: "16px"}}>
 									<div style={{float: "right"}}>
-										{Skill.get('keywords') ? Skill.get('keywords').map((word, key) => 
+										{skill.has('keywords') ? skill.get('keywords').map((word, key) => 
 											(<FlatButton key={key} style={{color:"#aaa", cursor: "default"}} label={word} />)
 										) : '' }
 									</div>

@@ -22,9 +22,9 @@ const Basics = React.createClass({
 					<mui.IconButton iconStyle={iconStyle} iconClassName="fa fa-envelope" tooltip={basicInfo.get('email')} tooltipPosition="top-center" />
 					<mui.IconButton iconStyle={iconStyle} iconClassName="fa fa-phone" tooltip={basicInfo.get('phone')} tooltipPosition="top-center" />
 					<mui.IconButton iconStyle={iconStyle} iconClassName="fa fa-external-link" tooltip={basicInfo.get('website')} tooltipPosition="top-center" />
-					{basicInfo.get('profiles').map((v) => 
-						v.size ? (<mui.IconButton key={v.get('network')} iconClassName={`fa fa-${v.get('network') ? v.get('network').toLowerCase() : ''}`} tooltip={v.get('url')} tooltipPosition="top-center" />) : ''
-					)}
+					{basicInfo.has('profiles') ? basicInfo.get('profiles').map((v) => 
+						v.size ? (<mui.IconButton key={v.get('network')} iconClassName={`fa fa-${v.has('network') ? v.get('network').toLowerCase() : ''}`} tooltip={v.get('url')} tooltipPosition="top-center" />) : ''
+					) : ''}
 				</div>
 				<h1 style={{fontSize: "3em"}}>{basicInfo.get('name')}<small>{basicInfo.get('label')}</small></h1>
 				<ClearFix />

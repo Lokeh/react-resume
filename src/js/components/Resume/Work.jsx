@@ -26,10 +26,10 @@ const Work = React.createClass({
 							<CardText expandable>
 								{work.get('summary')}
 							</CardText>
-							{work.get('highlights').size ? <CardText expandable>
+							{work.get('highlights') ? <CardText expandable>
 								Highlights:
 								<ul>
-									{work.get('highlights') ? work.get('highlights').map((highlight, key) => (<li key={key}>{highlight}</li>)) : ''}
+									{work.get('highlights').size ? work.get('highlights').map((highlight, key) => (<li key={key}>{highlight}</li>)) : ''}
 								</ul>
 							</CardText> : ''}
 						</Card>

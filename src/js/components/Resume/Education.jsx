@@ -23,10 +23,10 @@ const Education = React.createClass({
 								<div>{education.get('area')}</div>
 								<div>{education.get('startDate')} - {education.get('endDate')}</div>
 							</CardText>
-							{education.get('courses').size ? <CardText expandable>
+							{education.has('courses') ? <CardText expandable>
 								Courses:
 								<ul>
-									{education.get('courses') ? education.get('courses').map((course, key) => (<li key={key}>{course}</li>)) : ''}
+									{education.get('courses').size ? education.get('courses').map((course, key) => (<li key={key}>{course}</li>)) : ''}
 								</ul>
 							</CardText> : ''}
 						</Card>
