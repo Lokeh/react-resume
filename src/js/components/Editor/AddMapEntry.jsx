@@ -45,7 +45,9 @@ const AddMapEntry = React.createClass({
 						<option value="string">String</option>
 						<option value="map">Map</option>
 						<option value="list">List</option>
-					</select> <a href="#" onClick={this.setPath}><i className="fa fa-plus-circle add" /></a>
+					</select>
+					{' '}<a href="#" onClick={this.setPath}><i className="fa fa-plus add" /></a>
+					{' '}<a href="#" onClick={this.toggleOptions}><i className="fa fa-remove" /></a>
 				</div>
 			);
 		}
