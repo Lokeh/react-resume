@@ -11,11 +11,11 @@ const Basics = React.createClass({
 		return (
 			<div>
 				<div style={{float: "right"}}>
-					{basicInfo.has('email') ? (<IconButton iconStyle={iconStyle} iconClassName="fa fa-envelope" tooltip={basicInfo.get('email')} tooltipPosition="top-center" />) : ''}
-					{basicInfo.has('phone') ? (<IconButton iconStyle={iconStyle} iconClassName="fa fa-phone" tooltip={basicInfo.get('phone')} tooltipPosition="top-center" />) : ''}
-					{basicInfo.has('website') ? (<IconButton iconStyle={iconStyle} iconClassName="fa fa-external-link" tooltip={basicInfo.get('website')} tooltipPosition="top-center" />) : ''}
+					{basicInfo.has('email') ? (<IconButton iconStyle={iconStyle} iconClassName="fa fa-envelope" tooltip={basicInfo.get('email')} tooltipPosition="top-center" linkButton href={`mailto:${basicInfo.get('email')}`} />) : ''}
+					{basicInfo.has('phone') ? (<IconButton iconStyle={iconStyle} iconClassName="fa fa-phone" tooltip={basicInfo.get('phone')} tooltipPosition="top-center" linkButton href={`tel:${basicInfo.get('phone')}`} />) : ''}
+					{basicInfo.has('website') ? (<IconButton iconStyle={iconStyle} iconClassName="fa fa-external-link" tooltip={basicInfo.get('website')} tooltipPosition="top-center" linkButton href={basicInfo.get('website')} target="_blank" />) : ''}
 					{basicInfo.has('profiles') ? basicInfo.get('profiles').map((v) => 
-						v.size ? (<IconButton key={v.get('network')} iconClassName={`fa fa-${v.has('network') ? v.get('network').toLowerCase() : ''}`} tooltip={v.get('url')} tooltipPosition="top-center" />) : ''
+						v.size ? (<IconButton key={v.get('network')} iconClassName={`fa fa-${v.has('network') ? v.get('network').toLowerCase() : ''}`} tooltip={v.get('username')} tooltipPosition="top-center" linkButton href={v.get('url')} target="_blank" />) : ''
 					) : ''}
 				</div>
 				<h1 style={{fontSize: "3em", fontWeight: "normal"}}>{basicInfo.get('name')}<small style={{fontSize: ".5em", color: "#666", display: "block" }}>{basicInfo.get('label')}</small></h1>
