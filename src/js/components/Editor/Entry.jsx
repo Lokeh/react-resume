@@ -5,6 +5,20 @@ const {List, Map} = Immutable;
 const AddMapEntry = require('./AddMapEntry.jsx');
 const AddListEntry = require('./AddListEntry.jsx');
 
+const inputStyle = {
+	fontFamily: '"Source Code Pro", monospace',
+	background: '#282828',
+	border: '0',
+	color: '#E6DB74',
+	wordBreak: 'break-word'
+};
+
+const inputContainerStyle = {
+	fontFamily: '"Source Code Pro", monospace',
+	color: '#E6DB74',
+	fontSize: '11px'
+};
+
 const Entry = React.createClass({
 	propTypes: {
 		keyName: React.PropTypes.oneOfType([
@@ -92,7 +106,7 @@ const Entry = React.createClass({
 							}).toList()} 
 							{(isMinEditDepth) ? <AddListEntry path={this.props.path} saveFn={this.props.saveFn} getFn={this.props.getFn} /> : ''}
 						{']'}</span>) :
-					(<span className="input">
+					(<span style={inputContainerStyle}>
 						"<input
 							type="text"
 							value={this.state.inputValue}
@@ -100,6 +114,7 @@ const Entry = React.createClass({
 							onBlur={this._onBlur}
 							onKeyUp={this._onKeyUp}
 							size={this.state.inputValue.length}
+							style={inputStyle}
 						/>" <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a>
 					</span>)))
 				}

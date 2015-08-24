@@ -43,12 +43,12 @@ const AddListEntry = React.createClass({
 						<option value="map">Map</option>
 						<option value="list">List</option>
 					</select>
-					{' '}<a href="#" onClick={this.pushPath}><i className="fa fa-plus add" /></a>
+					{' '}<a href="#" onClick={this.pushPath}><i className="fa fa-plus" style={{color: "#A6E22E"}} /></a>
 					{' '}<a href="#" onClick={this.toggleOptions}><i className="fa fa-remove" /></a>
 				</div>
 			);
 		}
-		return (<div><a href="#"><i onClick={this.toggleOptions} className="fa fa-plus-circle add" style={{marginLeft: "19px"}} /></a></div>);
+		return (<div><a href="#"><i onClick={this.toggleOptions} className="fa fa-plus-circle add" style={{marginLeft: "19px", color: "#A6E22E"}} /></a></div>);
 	}
 });
 

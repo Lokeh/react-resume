@@ -2,6 +2,14 @@ const React = require('react');
 const Immutable = require('immutable');
 const {List, Map} = Immutable;
 
+const inputStyle = {
+	fontFamily: '"Source Code Pro", monospace',
+	background: '#282828',
+	border: '0',
+	color: '#E6DB74',
+	wordBreak: 'break-word'
+}
+
 const AddMapEntry = React.createClass({
 	getInitialState() {
 		return {
@@ -46,12 +54,12 @@ const AddMapEntry = React.createClass({
 						<option value="map">Map</option>
 						<option value="list">List</option>
 					</select>
-					{' '}<a href="#" onClick={this.setPath}><i className="fa fa-plus add" /></a>
+					{' '}<a href="#" onClick={this.setPath}><i className="fa fa-plus" style={{color: "#A6E22E"}} /></a>
 					{' '}<a href="#" onClick={this.toggleOptions}><i className="fa fa-remove" /></a>
 				</div>
 			);
 		}
-		return (<div><a href="#"><i onClick={this.toggleOptions} className="fa fa-plus-circle add" style={{marginLeft: "19px"}} /></a></div>);
+		return (<div><a href="#"><i onClick={this.toggleOptions} className="fa fa-plus-circle" style={{marginLeft: "19px", color: "#A6E22E"}} /></a></div>);
 	}
 });
 

@@ -45,18 +45,16 @@ const App = React.createClass({
 			.catch((err) => console.error(err));
 	},
 	render() {
-		const hidden = this.state.showEditor ? 'block' : 'none';
 		const width = this.state.showEditor ? "50%" : "100%";
 		return (
 			<div>
-				<div className="editor" style={{display: hidden}}>
-					<Editor
+				{this.state.showEditor ? 
+					(<Editor
 						data={this.state.resume}
 						saveFn={ResumeModel.setIn.bind(ResumeModel)}
 						deleteFn={ResumeModel.deleteIn.bind(ResumeModel)}
 						getFn={ResumeModel.getIn.bind(ResumeModel)}
-					/>
-				</div>
+					/>) : ''}
 				<div className="display" style={{float: "left", width: width}}>
 					<Resume data={this.state.resume} onAppBarTouch={this.toggleEditor} />
 				</div>
