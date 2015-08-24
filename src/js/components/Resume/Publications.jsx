@@ -2,11 +2,7 @@
 const React = require('react');
 
 // Material UI
-const mui = require('material-ui');
-const Paper = mui.Paper;
-const Card = mui.Card;
-const CardTitle = mui.CardTitle;
-const CardText = mui.CardText;
+const { Card, CardTitle, CardText } = require('material-ui');
 
 const Publications = React.createClass({
 	render() {

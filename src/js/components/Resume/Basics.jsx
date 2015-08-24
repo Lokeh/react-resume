@@ -1,15 +1,7 @@
 const React = require('react');
 
 // Material UI
-const mui = require('material-ui');
-const ThemeManager = new mui.Styles.ThemeManager();
-const Colors = mui.Styles.Colors;
-
-const Card = mui.Card;
-const CardTitle = mui.CardTitle;
-const CardText = mui.CardText;
-const ClearFix = mui.ClearFix;
-
+const { Card, CardTitle, CardText, ClearFix, IconButton } = require('material-ui');
 
 const Basics = React.createClass({
 	render() {
@@ -19,11 +11,11 @@ const Basics = React.createClass({
 		return (
 			<div>
 				<div style={{float: "right"}}>
-					{basicInfo.has('email') ? (<mui.IconButton iconStyle={iconStyle} iconClassName="fa fa-envelope" tooltip={basicInfo.get('email')} tooltipPosition="top-center" />) : ''}
-					{basicInfo.has('phone') ? (<mui.IconButton iconStyle={iconStyle} iconClassName="fa fa-phone" tooltip={basicInfo.get('phone')} tooltipPosition="top-center" />) : ''}
-					{basicInfo.has('website') ? (<mui.IconButton iconStyle={iconStyle} iconClassName="fa fa-external-link" tooltip={basicInfo.get('website')} tooltipPosition="top-center" />) : ''}
+					{basicInfo.has('email') ? (<IconButton iconStyle={iconStyle} iconClassName="fa fa-envelope" tooltip={basicInfo.get('email')} tooltipPosition="top-center" />) : ''}
+					{basicInfo.has('phone') ? (<IconButton iconStyle={iconStyle} iconClassName="fa fa-phone" tooltip={basicInfo.get('phone')} tooltipPosition="top-center" />) : ''}
+					{basicInfo.has('website') ? (<IconButton iconStyle={iconStyle} iconClassName="fa fa-external-link" tooltip={basicInfo.get('website')} tooltipPosition="top-center" />) : ''}
 					{basicInfo.has('profiles') ? basicInfo.get('profiles').map((v) => 
-						v.size ? (<mui.IconButton key={v.get('network')} iconClassName={`fa fa-${v.has('network') ? v.get('network').toLowerCase() : ''}`} tooltip={v.get('url')} tooltipPosition="top-center" />) : ''
+						v.size ? (<IconButton key={v.get('network')} iconClassName={`fa fa-${v.has('network') ? v.get('network').toLowerCase() : ''}`} tooltip={v.get('url')} tooltipPosition="top-center" />) : ''
 					) : ''}
 				</div>
 				<h1 style={{fontSize: "3em"}}>{basicInfo.get('name')}<small>{basicInfo.get('label')}</small></h1>
@@ -34,7 +26,6 @@ const Basics = React.createClass({
 							{location.get('address')}, {location.get('city')}, {location.get('postalCode')}
 							</address>);
 				})()}
-				{/*<h2>About Me</h2>-->*/}
 				<Card initiallyExpanded zDepth={0}>
 					<CardTitle title="About Me" />
 					<CardText expandable>

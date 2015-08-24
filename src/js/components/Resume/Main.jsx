@@ -12,8 +12,7 @@ React.initializeTouchEvents(true);
 const mui = require('material-ui');
 const ThemeManager = new mui.Styles.ThemeManager();
 const Colors = mui.Styles.Colors;
-const AppBar = mui.AppBar;
-const Snackbar = mui.Snackbar;
+const { AppBar, Snackbar } = mui;
 
 // components
 const Basics = require('./Basics.jsx');
