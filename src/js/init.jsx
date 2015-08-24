@@ -56,7 +56,7 @@ const App = React.createClass({
 		return (
 			<div style={appStyle}>
 				{this.state.showEditor ? 
-					(<div style={{float: "left", width: "50%", minWidth: "200px", overflow: "scroll", overflowY: "scroll", height: "100%" }}>
+					(<div style={{float: "left", width: "50%", minWidth: "200px", overflow: "scroll", overflowY: "scroll", height: "100%", background: "#282828" }}>
 						<Editor
 						data={this.state.resume}
 						saveFn={ResumeModel.setIn.bind(ResumeModel)}
