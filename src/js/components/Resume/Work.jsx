@@ -1,5 +1,6 @@
 // Work
 const React = require('react');
+const Map = require('immutable').Map;
 
 // Material UI
 const mui = require('material-ui');
@@ -16,7 +17,7 @@ const Work = React.createClass({
 			<div>
 				<Card initiallyExpanded zDepth={0}>
 					<CardTitle title="Experience" />
-					{this.props.info.map((work, key) => (
+					{this.props.info.map((work, key) => Map.isMap(work) ? (
 						<Card key={key} expandable style={{width: "95%", margin: "0 auto 16px"}} initiallyExpanded={singleItem}>
 							<CardTitle showExpandableButton><h2 style={{margin: "0"}}>{work.get('company')}</h2></CardTitle>
 							<CardText expandable>
@@ -32,8 +33,8 @@ const Work = React.createClass({
 									{work.get('highlights').size ? work.get('highlights').map((highlight, key) => (<li key={key}>{highlight}</li>)) : ''}
 								</ul>
 							</CardText> : ''}
-						</Card>
-					))}
+						</Card>) : ''
+					)}
 				</Card>
 			</div>
 		);
