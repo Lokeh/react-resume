@@ -32,6 +32,9 @@ const Resume = React.createClass({
 			muiTheme: ThemeManager.getCurrentTheme()
 		};
 	},
+	shouldComponentUpdate(nextProps) {
+		return this.props.data !== nextProps.data;
+	},
 	componentWillMount() {
 		ThemeManager.setPalette({
 			primary1Color: "#2C3E50"

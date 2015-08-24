@@ -20,6 +20,9 @@ const Editor = React.createClass({
 		deleteFn: React.PropTypes.func.isRequired,
 		getFn: React.PropTypes.func.isRequired
 	},
+	componentDidMount() {
+		HistoryModel.push(this.props.data);
+	},
 	componentWillReceiveProps(nextProps) {
 		HistoryModel.push(nextProps.data);
 	},
@@ -37,5 +40,7 @@ const Editor = React.createClass({
 		);
 	}
 });
+
+window.resumeHistory = HistoryModel;
 
 module.exports = Editor;

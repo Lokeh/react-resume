@@ -38,8 +38,10 @@ const EditorToolBar = React.createClass({
 		HistoryModel.addChangeListener(this._onChange);
 	},
 	undo() {
+			// console.log(HistoryModel.getAll());
 			HistoryModel.incOffset();
-			ResumeModel.new(HistoryModel.get(HistoryModel.getAll().offset));
+			const nextState = HistoryModel.get(HistoryModel.getAll().offset);
+			ResumeModel.new(nextState);
 	},
 	redo() {
 			HistoryModel.decOffset();
