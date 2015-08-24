@@ -11,6 +11,17 @@ const RaisedButton = mui.RaisedButton;
 const ResumeModel = require('../../models/ResumeModel');
 const HistoryModel = require('../../models/HistoryModel');
 
+const toolbarStyle = {
+	fontFamily: "Roboto, sans-serif",
+	margin: "0",
+	padding: "0",
+	WebkitFontSmoothing: "antialiased",
+	fontSize: "13px",
+	position: "fixed",
+	left: "50%",
+	transform: "translateX(-110px)"
+}
+
 const EditorToolBar = React.createClass({
 	childContextTypes: {
 		muiTheme: React.PropTypes.object
@@ -39,13 +50,11 @@ const EditorToolBar = React.createClass({
 		fs.saveAs(blob, "resume.json");
 	},
 	render() {
-		// const cantUndo = (this.state.size) === this.state.offset;
-		// const cantRedo = this.state.offset > this.state.size || this.state.offset === 1;
 		return (
-			<div>
+			<div style={toolbarStyle}>
 				<div style={{marginTop: "5px"}}><RaisedButton label="UNDO" primary onClick={this.undo} /></div>
 				<div style={{marginTop: "5px"}}><RaisedButton label="REDO" secondary onClick={this.redo} /></div>
-				<div style={{marginTop: "5px"}}><RaisedButton label="SAVE" onClick={this.save} /></div>		
+				<div style={{marginTop: "5px"}}><RaisedButton label="SAVE" onClick={this.save} /></div>
 			</div>
 		);
 	}

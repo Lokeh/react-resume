@@ -11,9 +11,16 @@ const ResumeModel = require('./models/ResumeModel');
 const getResumeJSON = require('./libs/getResumeJSON');
 const HistoryModel = require('./models/HistoryModel');
 
-
 const Resume = require('./components/Resume');
 const Editor = require('./components/Editor');
+
+const appStyle = {
+	fontFamily: "Roboto, sans-serif",
+	margin: "0",
+	padding: "0",
+	WebkitFontSmoothing: "antialiased",
+	fontSize: "13px"
+}
 
 const App = React.createClass({
 	propTypes: {
@@ -47,15 +54,17 @@ const App = React.createClass({
 	render() {
 		const width = this.state.showEditor ? "50%" : "100%";
 		return (
-			<div>
+			<div style={appStyle}>
 				{this.state.showEditor ? 
-					(<Editor
+					(<div style={{float: "left", width: "50%", minWidth: "200px", overflow: "scroll", overflowY: "scroll", height: "100%" }}>
+						<Editor
 						data={this.state.resume}
 						saveFn={ResumeModel.setIn.bind(ResumeModel)}
 						deleteFn={ResumeModel.deleteIn.bind(ResumeModel)}
 						getFn={ResumeModel.getIn.bind(ResumeModel)}
-					/>) : ''}
-				<div className="display" style={{float: "left", width: width}}>
+						/>
+					</div>) : ''}
+				<div style={{float: "left", width: width, overflow: "scroll", height: "100%"}}>
 					<Resume data={this.state.resume} onAppBarTouch={this.toggleEditor} />
 				</div>
 			</div>

@@ -18,7 +18,7 @@ const Basics = React.createClass({
 						v.size ? (<IconButton key={v.get('network')} iconClassName={`fa fa-${v.has('network') ? v.get('network').toLowerCase() : ''}`} tooltip={v.get('url')} tooltipPosition="top-center" />) : ''
 					) : ''}
 				</div>
-				<h1 style={{fontSize: "3em"}}>{basicInfo.get('name')}<small>{basicInfo.get('label')}</small></h1>
+				<h1 style={{fontSize: "3em", fontWeight: "normal"}}>{basicInfo.get('name')}<small style={{fontSize: ".5em", color: "#666", display: "block" }}>{basicInfo.get('label')}</small></h1>
 				<ClearFix />
 				{(() => {
 					const location = basicInfo.get('location');

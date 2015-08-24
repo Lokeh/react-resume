@@ -15,7 +15,7 @@ const Work = React.createClass({
 					<CardTitle title="Experience" />
 					{this.props.info.map((work, key) => Map.isMap(work) ? (
 						<Card key={key} expandable style={{width: "95%", margin: "0 auto 16px"}} initiallyExpanded={singleItem}>
-							<CardTitle showExpandableButton><h2 style={{margin: "0"}}>{work.get('company')}</h2></CardTitle>
+							<CardTitle showExpandableButton><h2 style={{margin: "0", fontWeight: "normal"}}>{work.get('company')}</h2></CardTitle>
 							<CardText expandable>
 								<div>{work.get('position')}</div>
 								<div>{work.get('startDate')} - {work.get('endDate')}</div>

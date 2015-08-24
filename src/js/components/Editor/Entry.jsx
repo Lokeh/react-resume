@@ -93,14 +93,14 @@ const Entry = React.createClass({
 				{(isMap || isList) ? <a onClick={this.toggleCollapsed}><i className="fa fa-minus-square" style={{color: "#FFD569", marginLeft: '-24px'}} /></a> : '' } {this.props.keyName}:{' '}
 				{
 					(isMap ?
-						(<span>{'{'} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a> : '' }
+						(<span>{'{'} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" style={{color: "#FD971F"}} /></a> : '' }
 							{value.map((v, k) => {
 								return (<Entry saveFn={this.props.saveFn} deleteFn={this.props.deleteFn} getFn={this.props.getFn} key={k} value={v} keyName={k} path={this.props.path+k+'.'} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
 							}).toList()}
 							{(isMinEditDepth) ? <AddMapEntry saveFn={this.props.saveFn} path={this.props.path} /> : ''}
 						{'}'}</span>) :
 					(isList ?
-						(<span>{'['} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a> : '' }
+						(<span>{'['} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" style={{color: "#FD971F"}} /></a> : '' }
 							{value.map((v, k) => {
 								return (<Entry saveFn={this.props.saveFn} deleteFn={this.props.deleteFn} getFn={this.props.getFn} key={k} value={v} keyName={k} path={this.props.path+k+'.'} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
 							}).toList()} 
@@ -115,7 +115,7 @@ const Entry = React.createClass({
 							onKeyUp={this._onKeyUp}
 							size={this.state.inputValue.length}
 							style={inputStyle}
-						/>" <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a>
+						/>" <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" style={{color: "#FD971F"}} /></a>
 					</span>)))
 				}
 				</div>
@@ -128,7 +128,7 @@ const Entry = React.createClass({
 						<i className="fa fa-plus-square" style={{color: "#FFD569", marginLeft: "-24px"}} />
 					</a> {this.props.keyName}
 					{(isMap ? ': { ' : ': [ ')}
-					{(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" /></a> : '' }
+					{(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" style={{color: "#FD971F"}} /></a> : '' }
 					{(isMap ? ' }' : ' ]')}
 				</div>
 			);

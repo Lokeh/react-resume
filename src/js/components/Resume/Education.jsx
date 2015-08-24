@@ -14,7 +14,7 @@ const Education = React.createClass({
 					<CardTitle title="Education" />
 					{this.props.info.map((education, key) => (
 						<Card key={key} expandable style={{width: "95%", margin: "0 auto 16px"}} initiallyExpanded={singleItem}>
-							<CardTitle showExpandableButton><h2 style={{margin: "0"}}>{education.get('institution')}</h2></CardTitle>
+							<CardTitle showExpandableButton><h2 style={{margin: "0", fontWeight: "normal"}}>{education.get('institution')}</h2></CardTitle>
 							<CardText expandable>
 								<div>{education.get('area')}</div>
 								<div>{education.get('startDate')} - {education.get('endDate')}</div>
