@@ -18,11 +18,6 @@ const AddMapEntry = React.createClass({
 			dataType: "string"
 		};
 	},
-	parsePath(path) {
-		const _path = path.split('.')
-		_path.pop();
-		return _path;
-	},
 	setPath(e) {
 		e.preventDefault();
 		const types = {

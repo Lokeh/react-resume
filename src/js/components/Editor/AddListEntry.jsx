@@ -9,11 +9,6 @@ const AddListEntry = React.createClass({
 			dataType: "string"
 		};
 	},
-	parsePath(path) {
-		const _path = path.split('.')
-		_path.pop();
-		return _path;
-	},
 	pushPath(e) {
 		e.preventDefault();
 		const types = {

@@ -33,7 +33,7 @@ const Editor = React.createClass({
 			<div style={editorStyle}>
 				<div style={{ margin: "0px 10px" }}>
 					<Toolbar />
-					<Entry cursor={this.props.cursor} value={this.props.data} keyName={this.props.name} path="" minEditDepth={0} minRemovalDepth={1} />
+					<Entry cursor={this.props.cursor} value={this.props.data} keyName={this.props.name} minEditDepth={1} minRemovalDepth={2} />
 				</div>
 			</div>
 		);
