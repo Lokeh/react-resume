@@ -1,5 +1,4 @@
 const React = require('react');
-const ResumeModel = require('../../models/ResumeModel');
 const Immutable = require('immutable');
 const {List, Map} = Immutable;
 
@@ -22,7 +21,6 @@ const AddListEntry = React.createClass({
 			list: List([]),
 			string: ""
 		};
-		// ResumeModel.push(this.parsePath(this.props.path), types[this.state.dataType]);
 		const path = this.parsePath(this.props.path);
 		this.props.saveFn(path, this.props.getFn(path).push(types[this.state.dataType]));
 		this.toggleOptions();

@@ -53,20 +53,18 @@ const Entry = React.createClass({
 	},
 	_onBlur(e) {
 		// update the model on blur
-		// ResumeModel.setIn(this.parsePath(this.props.path), this.state.inputValue);
 		this.props.saveFn(this.parsePath(this.props.path), this.state.inputValue);
 	},
 	_onKeyUp(e) {
 		// update the model on enter
 		if (e.key === "Enter") {
-			// ResumeModel.setIn(this.parsePath(this.props.path), this.state.inputValue);
 			this.props.saveFn(this.parsePath(this.props.path), this.state.inputValue);
 		}
 	},
 	deletePath(e) {
 		e.preventDefault();
-		// ResumeModel.deleteIn(this.parsePath(this.props.path));
-		this.props.deleteFn(this.parsePath(this.props.path));
+		// this.props.deleteFn(this.parsePath(this.props.path));
+		this.props.cursor.set(null);
 	},
 	toggleCollapsed(e) {
 		e.preventDefault();
@@ -82,10 +80,12 @@ const Entry = React.createClass({
 		return this.props.value !== nextProps.value || this.state.collapsed !== nextState.collapsed || this.state.inputValue !== nextState.inputValue
 	},
 	render() {
+		this.props.cursor ? console.log(this.props.cursor) : 0;
+
 		const value = this.props.value;
 		const isMinRemovalDepth = this.parsePath(this.props.path).length > this.props.minRemovalDepth;
-		const isMap = Map.isMap(value);
-		const isList = List.isList(value)
+		const isMap = !!this.props.cursor['@@__IMMUTABLE_KEYED__@@']; // Map.isMap(value);
+		const isList = !!this.props.cursor['@@__IMMUTABLE_ORDERED__@@'] && !isMap; // List.isList(value)
 		if (this.state.collapsed === false) {
 			const isMinEditDepth = this.parsePath(this.props.path).length > this.props.minEditDepth;
 			return (
@@ -95,14 +95,14 @@ const Entry = React.createClass({
 					(isMap ?
 						(<span>{'{'} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" style={{color: "#FD971F"}} /></a> : '' }
 							{value.map((v, k) => {
-								return (<Entry saveFn={this.props.saveFn} deleteFn={this.props.deleteFn} getFn={this.props.getFn} key={k} value={v} keyName={k} path={this.props.path+k+'.'} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
+								return (<Entry cursor={this.props.cursor.get(k)} saveFn={this.props.saveFn} deleteFn={this.props.deleteFn} getFn={this.props.getFn} key={k} value={v} keyName={k} path={this.props.path+k+'.'} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
 							}).toList()}
 							{(isMinEditDepth) ? <AddMapEntry saveFn={this.props.saveFn} path={this.props.path} /> : ''}
 						{'}'}</span>) :
 					(isList ?
 						(<span>{'['} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" style={{color: "#FD971F"}} /></a> : '' }
 							{value.map((v, k) => {
-								return (<Entry saveFn={this.props.saveFn} deleteFn={this.props.deleteFn} getFn={this.props.getFn} key={k} value={v} keyName={k} path={this.props.path+k+'.'} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
+								return (<Entry cursor={this.props.cursor.get(k)} saveFn={this.props.saveFn} deleteFn={this.props.deleteFn} getFn={this.props.getFn} key={k} value={v} keyName={k} path={this.props.path+k+'.'} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
 							}).toList()} 
 							{(isMinEditDepth) ? <AddListEntry path={this.props.path} saveFn={this.props.saveFn} getFn={this.props.getFn} /> : ''}
 						{']'}</span>) :

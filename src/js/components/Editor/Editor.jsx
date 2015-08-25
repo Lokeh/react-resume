@@ -18,7 +18,8 @@ const Editor = React.createClass({
 	propTypes: {
 		saveFn: React.PropTypes.func.isRequired,
 		deleteFn: React.PropTypes.func.isRequired,
-		getFn: React.PropTypes.func.isRequired
+		getFn: React.PropTypes.func.isRequired,
+		name: React.PropTypes.string
 	},
 	componentDidMount() {
 		HistoryModel.push(this.props.data);
@@ -30,17 +31,18 @@ const Editor = React.createClass({
 		return this.props.data !== nextProps.data;
 	},
 	render() {
+		console.log(this.props.cursor.size);
 		return (
 			<div style={editorStyle}>
 				<div style={{ margin: "0px 10px" }}>
 					<Toolbar />
-					<Entry value={this.props.data} saveFn={this.props.saveFn} deleteFn={this.props.deleteFn} getFn={this.props.getFn} keyName="resume" path="" minEditDepth={0} minRemovalDepth={1} />
+					<Entry cursor={this.props.cursor} value={this.props.data} saveFn={this.props.saveFn} deleteFn={this.props.deleteFn} getFn={this.props.getFn} keyName={this.props.name} path="" minEditDepth={0} minRemovalDepth={1} />
 				</div>
 			</div>
 		);
 	}
 });
 
-window.resumeHistory = HistoryModel;
+window.HistoryModel = HistoryModel;
 
 module.exports = Editor;
