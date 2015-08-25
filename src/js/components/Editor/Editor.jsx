@@ -16,9 +16,6 @@ const editorStyle = {
 
 const Editor = React.createClass({
 	propTypes: {
-		saveFn: React.PropTypes.func.isRequired,
-		deleteFn: React.PropTypes.func.isRequired,
-		getFn: React.PropTypes.func.isRequired,
 		name: React.PropTypes.string
 	},
 	componentDidMount() {
@@ -36,7 +33,7 @@ const Editor = React.createClass({
 			<div style={editorStyle}>
 				<div style={{ margin: "0px 10px" }}>
 					<Toolbar />
-					<Entry cursor={this.props.cursor} value={this.props.data} saveFn={this.props.saveFn} deleteFn={this.props.deleteFn} getFn={this.props.getFn} keyName={this.props.name} path="" minEditDepth={0} minRemovalDepth={1} />
+					<Entry cursor={this.props.cursor} value={this.props.data} keyName={this.props.name} path="" minEditDepth={0} minRemovalDepth={1} />
 				</div>
 			</div>
 		);

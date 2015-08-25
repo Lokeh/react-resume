@@ -17,12 +17,11 @@ const AddListEntry = React.createClass({
 	pushPath(e) {
 		e.preventDefault();
 		const types = {
-			map: Map({}),
-			list: List([]),
+			map: new Map({}),
+			list: new List([]),
 			string: ""
 		};
-		const path = this.parsePath(this.props.path);
-		this.props.saveFn(path, this.props.getFn(path).push(types[this.state.dataType]));
+		this.props.cursor.get(this.props.keyName).push(types[this.state.dataType]);
 		this.toggleOptions();
 	},
 	toggleOptions() {

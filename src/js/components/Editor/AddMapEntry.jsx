@@ -30,7 +30,7 @@ const AddMapEntry = React.createClass({
 			list: List([]),
 			string: ""
 		};
-		this.props.saveFn(this.parsePath(this.props.path+this.state.keyName+"."), types[this.state.dataType]);
+		this.props.cursor.get(this.props.keyName).set(this.state.keyName, types[this.state.dataType]);
 		this.toggleOptions();
 	},
 	toggleOptions() {

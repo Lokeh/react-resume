@@ -34,15 +34,11 @@ const Entry = React.createClass({
 		path: React.PropTypes.string.isRequired,
 		minEditDepth: React.PropTypes.number,
 		minRemovalDepth: React.PropTypes.number,
-		saveFn: React.PropTypes.func.isRequired,
-		deleteFn: React.PropTypes.func.isRequired,
-		getFn: React.PropTypes.func.isRequired
 	},
 	getInitialState() {
 		return {
 			collapsed: false,
-			inputValue: "",
-			cursor: null
+			inputValue: ""
 		};
 	},
 	parsePath(path) {
@@ -55,19 +51,16 @@ const Entry = React.createClass({
 	},
 	_onBlur(e) {
 		// update the model on blur
-		// this.props.saveFn(this.parsePath(this.props.path), this.state.inputValue);
 		this.props.cursor.set(this.props.keyName, this.state.inputValue);
 	},
 	_onKeyUp(e) {
 		// update the model on enter
 		if (e.key === "Enter") {
-			// this.props.saveFn(this.parsePath(this.props.path), this.state.inputValue);
 			this.props.cursor.set(this.props.keyName, this.state.inputValue);
 		}
 	},
 	deletePath(e) {
 		e.preventDefault();
-		// this.props.deleteFn(this.parsePath(this.props.path));
 		this.props.cursor.delete(this.props.keyName);
 	},
 	toggleCollapsed(e) {
@@ -90,7 +83,7 @@ const Entry = React.createClass({
 	render() {
 		const cursor = this.props.keyName !== 'resume' ? this.props.cursor.get(this.props.keyName) : this.props.cursor;
 
-		console.log(this.props.keyName+': changed');
+		// console.log(this.props.keyName+': changed');
 		const value = this.props.value;
 		const isMinRemovalDepth = this.parsePath(this.props.path).length > this.props.minRemovalDepth;
 		const isMap = !!cursor && !!cursor['@@__IMMUTABLE_KEYED__@@']; // Map.isMap(value);
@@ -104,16 +97,16 @@ const Entry = React.createClass({
 					(isMap ?
 						(<span>{'{'} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" style={{color: "#FD971F"}} /></a> : '' }
 							{value.map((v, k) => {
-								return (<Entry cursor={cursor} saveFn={this.props.saveFn} deleteFn={this.props.deleteFn} getFn={this.props.getFn} key={k} value={v} keyName={k} path={this.props.path+k+'.'} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
+								return (<Entry cursor={cursor} key={k} value={v} keyName={k} path={this.props.path+k+'.'} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
 							}).toList()}
-							{(isMinEditDepth) ? <AddMapEntry saveFn={this.props.saveFn} path={this.props.path} /> : ''}
+							{(isMinEditDepth) ? <AddMapEntry cursor={this.props.cursor} keyName={this.props.keyName} /> : ''}
 						{'}'}</span>) :
 					(isList ?
 						(<span>{'['} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" style={{color: "#FD971F"}} /></a> : '' }
 							{value.map((v, k) => {
-								return (<Entry cursor={cursor} saveFn={this.props.saveFn} deleteFn={this.props.deleteFn} getFn={this.props.getFn} key={k} value={v} keyName={k} path={this.props.path+k+'.'} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
+								return (<Entry cursor={cursor} key={k} value={v} keyName={k} path={this.props.path+k+'.'} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
 							}).toList()} 
-							{(isMinEditDepth) ? <AddListEntry path={this.props.path} saveFn={this.props.saveFn} getFn={this.props.getFn} /> : ''}
+							{(isMinEditDepth) ? <AddListEntry cursor={this.props.cursor} keyName={this.props.keyName} /> : ''}
 						{']'}</span>) :
 					(<span style={inputContainerStyle}>
 						"<input
