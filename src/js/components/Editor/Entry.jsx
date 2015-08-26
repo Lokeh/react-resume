@@ -2,6 +2,7 @@ const React = require('react');
 const Immutable = require('immutable');
 const Cursor = require('immutable/contrib/cursor');
 const {List, Map} = Immutable;
+const assign = require('object-assign');
 
 const AddMapEntry = require('./AddMapEntry.jsx');
 const AddListEntry = require('./AddListEntry.jsx');
@@ -72,64 +73,66 @@ const Entry = React.createClass({
 		});
 	},
 	shouldComponentUpdate(nextProps, nextState) {
-		return this.props.value !== nextProps.value || this.state.collapsed !== nextState.collapsed || this.state.inputValue !== nextState.inputValue
+		return this.props.value !== nextProps.value
+			|| this.props.style !== nextProps.style
+			|| this.state.collapsed !== nextState.collapsed
+			|| this.state.inputValue !== nextState.inputValue
 	},
 	render() {
 		const cursor = this.props.keyName !== 'resume' ? this.props.cursor.get(this.props.keyName) : this.props.cursor;
 
-		// console.log(this.props.cursor.deref().toJS());
-		this.props.cursor['_keyPath'].length === 1 ? console.log(this.props.cursor['_keyPath'], this.props.keyName) : 0;
 		const value = this.props.value;
-		const isMinRemovalDepth = this.props.cursor['_keyPath'].length +1 >= this.props.minRemovalDepth; //this.parsePath(this.props.path).length > this.props.minRemovalDepth;
-		const isMap = Map.isMap(value); // !!cursor && !!cursor['@@__IMMUTABLE_KEYED__@@']; // 
-		const isList = List.isList(value) //!!cursor && !!cursor['@@__IMMUTABLE_ORDERED__@@'] && !isMap; // 
-		if (this.state.collapsed === false) {
-			const isMinEditDepth = this.props.cursor['_keyPath'].length +1 >= this.props.minEditDepth;
-			return (
-				<div style={{marginLeft: "20px"}}>
-				{(isMap || isList) ? <a onClick={this.toggleCollapsed}><i className="fa fa-minus-square" style={{color: "#FFD569", marginLeft: '-24px'}} /></a> : '' } {this.props.keyName}:{' '}
-				{
-					(isMap ?
-						(<span>{'{'} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" style={{color: "#FD971F"}} /></a> : '' }
-							{value.map((v, k) => {
-								return (<Entry cursor={cursor} key={k} value={v} keyName={k} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
-							}).toList()}
-							{(isMinEditDepth) ? <AddMapEntry cursor={this.props.cursor} keyName={this.props.keyName} /> : ''}
-						{'}'}</span>) :
-					(isList ?
-						(<span>{'['} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" style={{color: "#FD971F"}} /></a> : '' }
-							{value.map((v, k) => {
-								return (<Entry cursor={cursor} key={k} value={v} keyName={k} minEditDepth={this.props.minEditDepth} minRemovalDepth={this.props.minRemovalDepth} />);
-							}).toList()} 
-							{(isMinEditDepth) ? <AddListEntry cursor={this.props.cursor} keyName={this.props.keyName} /> : ''}
-						{']'}</span>) :
-					(<span style={inputContainerStyle}>
-						"<input
-							type="text"
-							value={this.state.inputValue}
-							onChange={this._onChange}
-							onBlur={this._onBlur}
-							onKeyUp={this._onKeyUp}
-							size={this.state.inputValue.length}
-							style={inputStyle}
-						/>" <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" style={{color: "#FD971F"}} /></a>
-					</span>)))
-				}
-				</div>
-			);
-		}
-		else {
-			return (
-				<div style={{marginLeft: "20px"}}>
-					<a onClick={this.toggleCollapsed}>
-						<i className="fa fa-plus-square" style={{color: "#FFD569", marginLeft: "-24px"}} />
-					</a> {this.props.keyName}
-					{(isMap ? ': { ' : ': [ ')}
-					{(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" style={{color: "#FD971F"}} /></a> : '' }
-					{(isMap ? ' }' : ' ]')}
-				</div>
-			);
-		}
+		const isMinRemovalDepth = this.props.cursor['_keyPath'].length +1 >= this.props.minRemovalDepth;
+		const isMap = Map.isMap(value);
+		const isList = List.isList(value);
+		const collapsed = this.state.collapsed;
+		const hideEntry = { display: collapsed ? 'none' : 'block' };
+		const isMinEditDepth = this.props.cursor['_keyPath'].length +1 >= this.props.minEditDepth;
+		return (
+			<div style={assign({marginLeft: "20px"}, this.props.style)}>
+			{(isMap || isList) ? <a onClick={this.toggleCollapsed}><i className={`fa ${collapsed ? 'fa-plus-square' : 'fa-minus-square'}`} style={{color: "#FFD569", marginLeft: '-24px'}} /></a> : '' } {this.props.keyName}:{' '}
+			{
+				(isMap ?
+					(<span>{'{'} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" style={{color: "#FD971F"}} /> </a> : '' }
+						{value.map((v, k) => {
+							return (<Entry {...this.props} cursor={cursor} key={k} value={v} keyName={k} style={hideEntry} />);
+						}).toList()}
+						{(isMinEditDepth && !collapsed) ? <AddMapEntry cursor={this.props.cursor} keyName={this.props.keyName} /> : ''}
+					{'}'}</span>) :
+				(isList ?
+					(<span>{'['} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" style={{color: "#FD971F"}} /> </a> : '' }
+						{value.map((v, k) => {
+							return (<Entry {...this.props} cursor={cursor} key={k} value={v} keyName={k} style={hideEntry} />);
+						}).toList()} 
+						{(isMinEditDepth && !collapsed) ? <AddListEntry cursor={this.props.cursor} keyName={this.props.keyName} /> : ''}
+					{']'}</span>) :
+				(<span style={inputContainerStyle}>
+					"<input
+						type="text"
+						value={this.state.inputValue}
+						onChange={this._onChange}
+						onBlur={this._onBlur}
+						onKeyUp={this._onKeyUp}
+						size={this.state.inputValue.length}
+						style={inputStyle}
+					/>" <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" style={{color: "#FD971F"}} /></a>
+				</span>)))
+			}
+			</div>
+		);
+		// }
+		// else {
+		// 	return (
+		// 		<div style={{marginLeft: "20px"}}>
+		// 			<a onClick={this.toggleCollapsed}>
+		// 				<i className="fa fa-plus-square" style={{color: "#FFD569", marginLeft: "-24px"}} />
+		// 			</a> {this.props.keyName}
+		// 			{(isMap ? ': { ' : ': [ ')}
+		// 			{(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" style={{color: "#FD971F"}} /></a> : '' }
+		// 			{(isMap ? ' }' : ' ]')}
+		// 		</div>
+		// 	);
+		// }
 	}
 });
 
