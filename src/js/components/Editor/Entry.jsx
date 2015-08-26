@@ -79,7 +79,8 @@ const Entry = React.createClass({
 			|| this.state.inputValue !== nextState.inputValue
 	},
 	render() {
-		const cursor = this.props.keyName !== 'resume' ? this.props.cursor.get(this.props.keyName) : this.props.cursor;
+		console.log(this.props.cursor['_keyPath'].length);
+		const cursor = this.props.cursor.get(this.props.keyName);
 
 		const value = this.props.value;
 		const isMinRemovalDepth = this.props.cursor['_keyPath'].length +1 >= this.props.minRemovalDepth;
@@ -90,7 +91,7 @@ const Entry = React.createClass({
 		const isMinEditDepth = this.props.cursor['_keyPath'].length +1 >= this.props.minEditDepth;
 		return (
 			<div style={assign({marginLeft: "20px"}, this.props.style)}>
-			{(isMap || isList) ? <a onClick={this.toggleCollapsed}><i className={`fa ${collapsed ? 'fa-plus-square' : 'fa-minus-square'}`} style={{color: "#FFD569", marginLeft: '-24px'}} /></a> : '' } {this.props.keyName}:{' '}
+			{(isMap || isList) ? <a onClick={this.toggleCollapsed}><i className={`fa ${collapsed ? 'fa-plus-square' : 'fa-minus-square'}`} style={{color: "#FFD569", marginLeft: '-23px'}} /></a> : '' } {this.props.keyName}:{' '}
 			{
 				(isMap ?
 					(<span>{'{'} {(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" style={{color: "#FD971F"}} /> </a> : '' }
