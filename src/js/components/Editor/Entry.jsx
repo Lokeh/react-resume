@@ -81,8 +81,8 @@ const Entry = React.createClass({
 		this.props.cursor['_keyPath'].length === 1 ? console.log(this.props.cursor['_keyPath'], this.props.keyName) : 0;
 		const value = this.props.value;
 		const isMinRemovalDepth = this.props.cursor['_keyPath'].length +1 >= this.props.minRemovalDepth; //this.parsePath(this.props.path).length > this.props.minRemovalDepth;
-		const isMap = !!cursor && !!cursor['@@__IMMUTABLE_KEYED__@@']; // Map.isMap(value);
-		const isList = !!cursor && !!cursor['@@__IMMUTABLE_ORDERED__@@'] && !isMap; // List.isList(value)
+		const isMap = Map.isMap(value); // !!cursor && !!cursor['@@__IMMUTABLE_KEYED__@@']; // 
+		const isList = List.isList(value) //!!cursor && !!cursor['@@__IMMUTABLE_ORDERED__@@'] && !isMap; // 
 		if (this.state.collapsed === false) {
 			const isMinEditDepth = this.props.cursor['_keyPath'].length +1 >= this.props.minEditDepth;
 			return (
