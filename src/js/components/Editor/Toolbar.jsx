@@ -8,7 +8,6 @@ const ThemeManager = new mui.Styles.ThemeManager();
 const Colors = mui.Styles.Colors;
 const RaisedButton = mui.RaisedButton;
 
-const ResumeModel = require('../../models/ResumeModel');
 const HistoryModel = require('../../models/HistoryModel');
 
 const toolbarStyle = {
@@ -31,23 +30,18 @@ const EditorToolBar = React.createClass({
 			muiTheme: ThemeManager.getCurrentTheme()
 		};
 	},
-	_onChange() {
-		this.setState({ size: HistoryModel.getAll().history.size })
-	},
-	componentWillMount() {
-		HistoryModel.addChangeListener(this._onChange);
-	},
 	undo() {
 			HistoryModel.incOffset();
 			const nextState = HistoryModel.get(HistoryModel.getAll().offset);
-			ResumeModel.new(nextState);
+			this.props.cursor.update((v) => { return nextState; });
 	},
 	redo() {
 			HistoryModel.decOffset();
-			ResumeModel.new(HistoryModel.get(HistoryModel.getAll().offset));
+			const nextState = HistoryModel.get(HistoryModel.getAll().offset);
+			this.props.cursor.update((v) => { return nextState; });
 	},
 	save() {
-		const blob = new Blob([JSON.stringify(ResumeModel.getAll().toJS())], {type: "application/json;charset=utf-8"});
+		const blob = new Blob([JSON.stringify(this.props.cursor.deref().toJS())], {type: "application/json;charset=utf-8"});
 		fs.saveAs(blob, "resume.json");
 	},
 	render() {

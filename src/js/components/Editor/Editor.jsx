@@ -31,7 +31,7 @@ const Editor = React.createClass({
 		return (
 			<div style={editorStyle}>
 				<div style={{ margin: "0px 10px" }}>
-					<Toolbar />
+					<Toolbar cursor={this.props.cursor} />
 					{'{'}
 					<div style={{marginLeft: "5px"}}>
 						{this.props.data.map((entry, key) => 

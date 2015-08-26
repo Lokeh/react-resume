@@ -57,7 +57,7 @@ const App = React.createClass({
 		const width = this.state.showEditor ? "50%" : "100%";
 		const topCursor = Cursor.from(ResumeModel.getAll(), (newData, oldData, path) => {
 			console.log(newData !== oldData);
-			console.log(diff(oldData, newData).toJS());
+			// console.log(diff(oldData, newData).toJS());
 			ResumeModel.new(newData);
 		});
 		return (
