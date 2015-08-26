@@ -54,7 +54,7 @@ const AddMapEntry = React.createClass({
 				</div>
 			);
 		}
-		return (<div><a href="#"><i onClick={this.toggleOptions} className="fa fa-plus-circle" style={{marginLeft: "19px", color: "#A6E22E"}} /></a></div>);
+		return (<div style={{marginLeft: "19px"}}>{String.fromCharCode(8627)} <a href="#"><i onClick={this.toggleOptions} className="fa fa-plus-circle" style={{color: "#A6E22E"}} /></a></div>);
 	}
 });
 
