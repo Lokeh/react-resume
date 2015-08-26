@@ -79,16 +79,17 @@ const Entry = React.createClass({
 			|| this.state.inputValue !== nextState.inputValue
 	},
 	render() {
-		console.log(this.props.cursor['_keyPath'].length);
 		const cursor = this.props.cursor.get(this.props.keyName);
-
 		const value = this.props.value;
+		const collapsed = this.state.collapsed;
+
+
 		const isMinRemovalDepth = this.props.cursor['_keyPath'].length +1 >= this.props.minRemovalDepth;
+		const isMinEditDepth = this.props.cursor['_keyPath'].length +1 >= this.props.minEditDepth;
 		const isMap = Map.isMap(value);
 		const isList = List.isList(value);
-		const collapsed = this.state.collapsed;
+
 		const hideEntry = { display: collapsed ? 'none' : 'block' };
-		const isMinEditDepth = this.props.cursor['_keyPath'].length +1 >= this.props.minEditDepth;
 		return (
 			<div style={assign({marginLeft: "20px"}, this.props.style)}>
 			{(isMap || isList) ? <a onClick={this.toggleCollapsed}><i className={`fa ${collapsed ? 'fa-plus-square' : 'fa-minus-square'}`} style={{color: "#FFD569", marginLeft: '-23px'}} /></a> : '' } {this.props.keyName}:{' '}
@@ -121,19 +122,6 @@ const Entry = React.createClass({
 			}
 			</div>
 		);
-		// }
-		// else {
-		// 	return (
-		// 		<div style={{marginLeft: "20px"}}>
-		// 			<a onClick={this.toggleCollapsed}>
-		// 				<i className="fa fa-plus-square" style={{color: "#FFD569", marginLeft: "-24px"}} />
-		// 			</a> {this.props.keyName}
-		// 			{(isMap ? ': { ' : ': [ ')}
-		// 			{(isMinRemovalDepth) ? <a href="#" onClick={this.deletePath}><i className="fa fa-times-circle" style={{color: "#FD971F"}} /></a> : '' }
-		// 			{(isMap ? ' }' : ' ]')}
-		// 		</div>
-		// 	);
-		// }
 	}
 });
 

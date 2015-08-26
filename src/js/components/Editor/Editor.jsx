@@ -36,11 +36,11 @@ const Editor = React.createClass({
 					<div style={{marginLeft: "5px"}}>
 						{this.props.data.map((entry, key) => 
 							(<Entry
+								{...this.props}
 								cursor={this.props.cursor}
 								value={entry}
+								key={key}
 								keyName={key}
-								minEditDepth={1}
-								minRemovalDepth={2}
 							/>)
 						).toList()}
 					</div>

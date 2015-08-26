@@ -68,6 +68,8 @@ const App = React.createClass({
 						data={this.state.resume}
 						name="resume"
 						cursor={topCursor}
+						minEditDepth={1}
+						minRemovalDepth={2}
 						/>
 					</div>) : ''}
 				<div style={{float: "left", width: width, overflow: "scroll", height: "100%"}}>
