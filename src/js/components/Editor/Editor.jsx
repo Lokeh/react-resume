@@ -7,7 +7,6 @@ const Entry = require('./Entry.jsx');
 const Toolbar = require('./Toolbar.jsx');
 
 const editorStyle = {
-	background: "#282828",
 	color: "#F8F8F2",
 	fontFamily: '"Source Code Pro", monospace',
 	fontSize: "16px",
