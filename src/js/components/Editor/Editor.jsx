@@ -32,7 +32,19 @@ const Editor = React.createClass({
 			<div style={editorStyle}>
 				<div style={{ margin: "0px 10px" }}>
 					<Toolbar />
-					<Entry cursor={this.props.cursor} value={this.props.data} keyName={this.props.name} minEditDepth={1} minRemovalDepth={2} />
+					{'{'}
+					<div style={{marginLeft: "5px"}}>
+						{this.props.data.map((entry, key) => 
+							(<Entry
+								cursor={this.props.cursor}
+								value={entry}
+								keyName={key}
+								minEditDepth={1}
+								minRemovalDepth={2}
+							/>)
+						).toList()}
+					</div>
+					{'}'}
 				</div>
 			</div>
 		);
