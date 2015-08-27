@@ -13,6 +13,7 @@ const getResumeJSON = require('./libs/getResumeJSON');
 
 const Resume = require('./components/Resume');
 const Editor = require('immutable-editor');
+const Toolbar = require('./components/Toolbar.jsx');
 
 const appStyle = {
 	fontFamily: "Roboto, sans-serif",
@@ -20,6 +21,17 @@ const appStyle = {
 	padding: "0",
 	WebkitFontSmoothing: "antialiased",
 	fontSize: "13px"
+}
+
+const toolbarStyle = {
+	fontFamily: "Roboto, sans-serif",
+	margin: "0",
+	padding: "0",
+	WebkitFontSmoothing: "antialiased",
+	fontSize: "13px",
+	position: "absolute",
+	left: "100%",
+	transform: "translateX(-110px)"
 }
 
 const App = React.createClass({
@@ -51,18 +63,24 @@ const App = React.createClass({
 			})
 			.catch((err) => console.error(err));
 	},
+	_onEditorUpdate(newData) {
+		console.log(diff(this.state.resume, newData).toJS());
+		ResumeModel.new(newData)
+	},
 	render() {
 		const width = this.state.showEditor ? "50%" : "100%";
 		return (
 			<div style={appStyle}>
 				{this.state.showEditor ?
 					(<div style={{float: "left", width: "50%", minWidth: "200px", overflow: "scroll", overflowY: "scroll", height: "100%", background: "#282828", position: "relative" }}>
+						<Toolbar
+						undo={() => { this._onEditorUpdate(Editor.undo(true)) }}
+						redo={() => { this._onEditorUpdate(Editor.redo(true)) }}
+						save={() => { Editor.save('resume.json') }}
+						/>
 						<Editor
 						data={this.state.resume}
-						onUpdate={(newData) => {
-							console.log(diff(newData, this.state.resume).toJS());
-							ResumeModel.new(newData)
-						}}
+						onUpdate={this._onEditorUpdate}
 						minEditDepth={1}
 						minRemovalDepth={2}
 						immutable
