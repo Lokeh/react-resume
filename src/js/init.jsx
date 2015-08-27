@@ -3,9 +3,8 @@
 const React = require('react');
 const injectTapEventPlugin = require("react-tap-event-plugin");
 const Immutable = require('immutable');
-const Cursor = require('immutable/contrib/cursor');
-var diff = require('immutablediff');
 const {List, Map} = Immutable;
+const diff = require('immutablediff');
 injectTapEventPlugin();
 React.initializeTouchEvents();
 
@@ -54,21 +53,19 @@ const App = React.createClass({
 	},
 	render() {
 		const width = this.state.showEditor ? "50%" : "100%";
-		const topCursor = Cursor.from(ResumeModel.getAll(), (newData, oldData, path) => {
-			console.log(newData !== oldData);
-			// console.log(diff(oldData, newData).toJS());
-			ResumeModel.new(newData);
-		});
 		return (
 			<div style={appStyle}>
 				{this.state.showEditor ?
 					(<div style={{float: "left", width: "50%", minWidth: "200px", overflow: "scroll", overflowY: "scroll", height: "100%", background: "#282828", position: "relative" }}>
 						<Editor
 						data={this.state.resume}
-						name="resume"
-						cursor={topCursor}
+						onUpdate={(newData) => {
+							console.log(diff(newData, this.state.resume).toJS());
+							ResumeModel.new(newData)
+						}}
 						minEditDepth={1}
 						minRemovalDepth={2}
+						immutable
 						/>
 					</div>) : ''}
 				<div style={{float: "left", width: width, overflow: "scroll", height: "100%"}}>
