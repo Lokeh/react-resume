@@ -71,22 +71,21 @@ const App = React.createClass({
 		const width = this.state.showEditor ? "50%" : "100%";
 		return (
 			<div style={appStyle}>
-				{this.state.showEditor ?
-					(<div style={{float: "left", width: "50%", minWidth: "200px", overflow: "scroll", overflowY: "scroll", height: "100%", background: "#282828", position: "relative" }}>
-						<Toolbar
-						undo={() => { this._onEditorUpdate(Editor.undo(true)) }}
-						redo={() => { this._onEditorUpdate(Editor.redo(true)) }}
-						save={() => { Editor.save('resume.json') }}
-						/>
-						<Editor
-						data={this.state.resume}
-						onUpdate={this._onEditorUpdate}
-						minEditDepth={1}
-						minRemovalDepth={2}
-						immutable
-						/>
-					</div>) : ''}
-				<div style={{float: "left", width: width, overflow: "scroll", height: "100%"}}>
+				{this.state.resume.size ? (<div style={{float: "left", width: this.state.showEditor ? "50%" : "0", overflow: "scroll", overflowY: "scroll", height: "100%", background: "#282828", position: "relative", transition: ".5s width" }}>
+									<Toolbar
+									undo={() => { this._onEditorUpdate(Editor.undo(true)) }}
+									redo={() => { this._onEditorUpdate(Editor.redo(true)) }}
+									save={() => { Editor.save('resume.json') }}
+									/>
+									<Editor
+									data={this.state.resume}
+									onUpdate={this._onEditorUpdate}
+									minEditDepth={1}
+									minRemovalDepth={2}
+									immutable
+									/>
+				</div>) : '' }
+				<div style={{float: "left", width: width, overflow: "scroll", height: "100%", transition: "width 0.5s"}}>
 					<Resume data={this.state.resume} onAppBarTouch={this.toggleEditor} />
 				</div>
 			</div>
