@@ -311,7 +311,6 @@ var Map = Immutable.Map;
 
 var AddListEntry = React.createClass({
 	displayName: 'AddListEntry',
-
 	getInitialState: function getInitialState() {
 		return {
 			showOptions: false,
@@ -343,55 +342,107 @@ var AddListEntry = React.createClass({
 		if (this.state.showOptions) {
 			return React.createElement(
 				'div',
-				{ style: { marginLeft: "20px" } },
+				{ style: { marginLeft: "20px" }, __source: {
+						fileName: '../../../src/components/AddListEntry.jsx',
+						lineNumber: 37
+					}
+				},
 				React.createElement(
 					'label',
-					{ htmlFor: 'type' },
+					{ htmlFor: 'type', __source: {
+							fileName: '../../../src/components/AddListEntry.jsx',
+							lineNumber: 38
+						}
+					},
 					'type:'
 				),
 				' ',
 				React.createElement(
 					'select',
-					{ name: 'type', onChange: this.setType },
+					{ name: 'type', onChange: this.setType, __source: {
+							fileName: '../../../src/components/AddListEntry.jsx',
+							lineNumber: 38
+						}
+					},
 					React.createElement(
 						'option',
-						{ value: 'string' },
+						{ value: 'string', __source: {
+								fileName: '../../../src/components/AddListEntry.jsx',
+								lineNumber: 39
+							}
+						},
 						'String'
 					),
 					React.createElement(
 						'option',
-						{ value: 'map' },
+						{ value: 'map', __source: {
+								fileName: '../../../src/components/AddListEntry.jsx',
+								lineNumber: 40
+							}
+						},
 						'Map'
 					),
 					React.createElement(
 						'option',
-						{ value: 'list' },
+						{ value: 'list', __source: {
+								fileName: '../../../src/components/AddListEntry.jsx',
+								lineNumber: 41
+							}
+						},
 						'List'
 					)
 				),
 				' ',
 				React.createElement(
 					'a',
-					{ href: '#', onClick: this.pushPath },
-					React.createElement('i', { className: 'fa fa-plus', style: { color: "#A6E22E" } })
+					{ href: '#', onClick: this.pushPath, __source: {
+							fileName: '../../../src/components/AddListEntry.jsx',
+							lineNumber: 43
+						}
+					},
+					React.createElement('i', { className: 'fa fa-plus', style: { color: "#A6E22E" }, __source: {
+							fileName: '../../../src/components/AddListEntry.jsx',
+							lineNumber: 43
+						}
+					})
 				),
 				' ',
 				React.createElement(
 					'a',
-					{ href: '#', onClick: this.toggleOptions },
-					React.createElement('i', { className: 'fa fa-remove', style: { color: "#FD971F" } })
+					{ href: '#', onClick: this.toggleOptions, __source: {
+							fileName: '../../../src/components/AddListEntry.jsx',
+							lineNumber: 44
+						}
+					},
+					React.createElement('i', { className: 'fa fa-remove', style: { color: "#FD971F" }, __source: {
+							fileName: '../../../src/components/AddListEntry.jsx',
+							lineNumber: 44
+						}
+					})
 				)
 			);
 		}
 		return React.createElement(
 			'div',
-			{ style: { marginLeft: "19px" } },
+			{ style: { marginLeft: "19px" }, __source: {
+					fileName: '../../../src/components/AddListEntry.jsx',
+					lineNumber: 48
+				}
+			},
 			String.fromCharCode(8627),
 			' ',
 			React.createElement(
 				'a',
-				{ href: '#' },
-				React.createElement('i', { onClick: this.toggleOptions, className: 'fa fa-plus-circle add', style: { color: "#A6E22E" } })
+				{ href: '#', __source: {
+						fileName: '../../../src/components/AddListEntry.jsx',
+						lineNumber: 48
+					}
+				},
+				React.createElement('i', { onClick: this.toggleOptions, className: 'fa fa-plus-circle add', style: { color: "#A6E22E" }, __source: {
+						fileName: '../../../src/components/AddListEntry.jsx',
+						lineNumber: 48
+					}
+				})
 			)
 		);
 	}
@@ -417,7 +468,6 @@ var inputStyle = {
 
 var AddMapEntry = React.createClass({
 	displayName: 'AddMapEntry',
-
 	getInitialState: function getInitialState() {
 		return {
 			showOptions: false,
@@ -454,63 +504,128 @@ var AddMapEntry = React.createClass({
 		if (this.state.showOptions) {
 			return React.createElement(
 				'div',
-				{ style: { marginLeft: "20px" } },
+				{ style: { marginLeft: "20px" }, __source: {
+						fileName: '../../../src/components/AddMapEntry.jsx',
+						lineNumber: 50
+					}
+				},
 				React.createElement(
 					'label',
-					{ htmlFor: 'key' },
+					{ htmlFor: 'key', __source: {
+							fileName: '../../../src/components/AddMapEntry.jsx',
+							lineNumber: 51
+						}
+					},
 					'key:'
 				),
 				' ',
-				React.createElement('input', { name: 'key', type: 'text', onChange: this.setKey }),
-				React.createElement('br', null),
+				React.createElement('input', { name: 'key', type: 'text', onChange: this.setKey, __source: {
+						fileName: '../../../src/components/AddMapEntry.jsx',
+						lineNumber: 51
+					}
+				}),
+				React.createElement('br', {
+					__source: {
+						fileName: '../../../src/components/AddMapEntry.jsx',
+						lineNumber: 51
+					}
+				}),
 				React.createElement(
 					'label',
-					{ htmlFor: 'type' },
+					{ htmlFor: 'type', __source: {
+							fileName: '../../../src/components/AddMapEntry.jsx',
+							lineNumber: 52
+						}
+					},
 					'type:'
 				),
 				' ',
 				React.createElement(
 					'select',
-					{ name: 'type', onChange: this.setType },
+					{ name: 'type', onChange: this.setType, __source: {
+							fileName: '../../../src/components/AddMapEntry.jsx',
+							lineNumber: 52
+						}
+					},
 					React.createElement(
 						'option',
-						{ value: 'string' },
+						{ value: 'string', __source: {
+								fileName: '../../../src/components/AddMapEntry.jsx',
+								lineNumber: 53
+							}
+						},
 						'String'
 					),
 					React.createElement(
 						'option',
-						{ value: 'map' },
+						{ value: 'map', __source: {
+								fileName: '../../../src/components/AddMapEntry.jsx',
+								lineNumber: 54
+							}
+						},
 						'Map'
 					),
 					React.createElement(
 						'option',
-						{ value: 'list' },
+						{ value: 'list', __source: {
+								fileName: '../../../src/components/AddMapEntry.jsx',
+								lineNumber: 55
+							}
+						},
 						'List'
 					)
 				),
 				' ',
 				React.createElement(
 					'a',
-					{ href: '#', onClick: this.setPath },
-					React.createElement('i', { className: 'fa fa-plus', style: { color: "#A6E22E" } })
+					{ href: '#', onClick: this.setPath, __source: {
+							fileName: '../../../src/components/AddMapEntry.jsx',
+							lineNumber: 57
+						}
+					},
+					React.createElement('i', { className: 'fa fa-plus', style: { color: "#A6E22E" }, __source: {
+							fileName: '../../../src/components/AddMapEntry.jsx',
+							lineNumber: 57
+						}
+					})
 				),
 				' ',
 				React.createElement(
 					'a',
-					{ href: '#', onClick: this.toggleOptions },
-					React.createElement('i', { className: 'fa fa-remove', style: { color: "#FD971F" } })
+					{ href: '#', onClick: this.toggleOptions, __source: {
+							fileName: '../../../src/components/AddMapEntry.jsx',
+							lineNumber: 58
+						}
+					},
+					React.createElement('i', { className: 'fa fa-remove', style: { color: "#FD971F" }, __source: {
+							fileName: '../../../src/components/AddMapEntry.jsx',
+							lineNumber: 58
+						}
+					})
 				)
 			);
 		}
 		return React.createElement(
 			'div',
-			{ style: { marginLeft: "19px" } },
+			{ style: { marginLeft: "19px" }, __source: {
+					fileName: '../../../src/components/AddMapEntry.jsx',
+					lineNumber: 62
+				}
+			},
 			String.fromCharCode(8627),
 			' ',
 			React.createElement(
 				'a',
-				{ href: '#' },
-				React.createElement('i', { onClick: this.toggleOptions, className: 'fa fa-plus-circle', style: { color: "#A6E22E" } })
+				{ href: '#', __source: {
+						fileName: '../../../src/components/AddMapEntry.jsx',
+						lineNumber: 62
+					}
+				},
+				React.createElement('i', { onClick: this.toggleOptions, className: 'fa fa-plus-circle', style: { color: "#A6E22E" }, __source: {
+						fileName: '../../../src/components/AddMapEntry.jsx',
+						lineNumber: 62
+					}
+				})
 			)
 		);
 	}
@@ -519,11 +634,11 @@ var AddMapEntry = React.createClass({
 module.exports = AddMapEntry;
 
 },{"immutable":"immutable","react":"react"}],"/Users/will/Code/resume/node_modules/immutable-editor/dist/components/Editor.js":[function(require,module,exports){
-// Top-level component
 'use strict';
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
+// Top-level component
 var React = require('react');
 var Immutable = require('immutable');
 var Map = Immutable.Map;
@@ -602,23 +717,47 @@ var Editor = React.createClass({
 		var isList = List.isList(this.props.data);
 		return React.createElement(
 			'div',
-			{ style: editorStyle },
+			{ style: editorStyle, __source: {
+					fileName: '../../../src/components/Editor.jsx',
+					lineNumber: 69
+				}
+			},
 			React.createElement(
 				'div',
-				{ style: { margin: "0px 10px" } },
+				{ style: { margin: "0px 10px" }, __source: {
+						fileName: '../../../src/components/Editor.jsx',
+						lineNumber: 70
+					}
+				},
 				isMap ? '{' : '[',
 				React.createElement(
 					'div',
-					{ style: { marginLeft: "5px" } },
+					{ style: { marginLeft: "5px" }, __source: {
+							fileName: '../../../src/components/Editor.jsx',
+							lineNumber: 73
+						}
+					},
 					data.map(function (entry, key) {
 						return React.createElement(Entry, _extends({}, _this.props, {
 							cursor: rootCursor,
 							value: entry,
 							key: key,
-							keyName: key
+							keyName: key,
+							__source: {
+								fileName: '../../../src/components/Editor.jsx',
+								lineNumber: 75
+							}
 						}));
 					}).toList(),
-					this.props.minEditDepth === 0 ? isMap ? React.createElement(AddMapEntry, { cursor: rootCursor }) : React.createElement(AddListEntry, { cursor: rootCursor }) : ''
+					this.props.minEditDepth === 0 ? isMap ? React.createElement(AddMapEntry, { cursor: rootCursor, __source: {
+							fileName: '../../../src/components/Editor.jsx',
+							lineNumber: 85
+						}
+					}) : React.createElement(AddListEntry, { cursor: rootCursor, __source: {
+							fileName: '../../../src/components/Editor.jsx',
+							lineNumber: 86
+						}
+					}) : ''
 				),
 				isMap ? '}' : ']'
 			)
@@ -629,7 +768,6 @@ var Editor = React.createClass({
 window.HistoryModel = HistoryModel;
 
 module.exports = Editor;
-/*<Toolbar cursor={rootCursor} />*/
 
 },{"../libs/FileSaver":"/Users/will/Code/resume/node_modules/immutable-editor/dist/libs/FileSaver.js","../models/HistoryModel":"/Users/will/Code/resume/node_modules/immutable-editor/dist/models/HistoryModel.js","./AddListEntry":"/Users/will/Code/resume/node_modules/immutable-editor/dist/components/AddListEntry.js","./AddMapEntry":"/Users/will/Code/resume/node_modules/immutable-editor/dist/components/AddMapEntry.js","./Entry":"/Users/will/Code/resume/node_modules/immutable-editor/dist/components/Entry.js","immutable":"immutable","immutable/contrib/cursor":"/Users/will/Code/resume/node_modules/immutable/contrib/cursor/index.js","react":"react"}],"/Users/will/Code/resume/node_modules/immutable-editor/dist/components/Entry.js":[function(require,module,exports){
 'use strict';
@@ -692,7 +830,7 @@ var Entry = React.createClass({
 	},
 	deletePath: function deletePath(e) {
 		e.preventDefault();
-		this.props.cursor['delete'](this.props.keyName);
+		this.props.cursor.delete(this.props.keyName);
 	},
 	toggleCollapsed: function toggleCollapsed(e) {
 		e.preventDefault();
@@ -709,7 +847,7 @@ var Entry = React.createClass({
 		});
 	},
 	shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
-		return this.props.value !== nextProps.value || this.props.style !== nextProps.style || this.state.collapsed !== nextState.collapsed || this.state.inputValue !== nextState.inputValue;
+		return this.props.value !== nextProps.value || this.props.style !== nextProps.style || this.state.collapsed !== nextState.collapsed || this.state.inputValue !== nextState.inputValue || this.props.cursor !== nextProps.cursor;
 	},
 	render: function render() {
 		var _this = this;
@@ -726,11 +864,23 @@ var Entry = React.createClass({
 		var hideEntry = { display: collapsed ? 'none' : 'block' };
 		return React.createElement(
 			'div',
-			{ style: assign({ marginLeft: "20px" }, this.props.style) },
+			{ style: assign({ marginLeft: "20px" }, this.props.style), __source: {
+					fileName: '../../../src/components/Entry.jsx',
+					lineNumber: 96
+				}
+			},
 			isMap || isList ? React.createElement(
 				'a',
-				{ onClick: this.toggleCollapsed },
-				React.createElement('i', { className: 'fa ' + (collapsed ? 'fa-plus-square' : 'fa-minus-square'), style: { color: "#FFD569", marginLeft: '-23px' } })
+				{ onClick: this.toggleCollapsed, __source: {
+						fileName: '../../../src/components/Entry.jsx',
+						lineNumber: 97
+					}
+				},
+				React.createElement('i', { className: 'fa ' + (collapsed ? 'fa-plus-square' : 'fa-minus-square'), style: { color: "#FFD569", marginLeft: '-23px' }, __source: {
+						fileName: '../../../src/components/Entry.jsx',
+						lineNumber: 97
+					}
+				})
 			) : '',
 			' ',
 			this.props.keyName,
@@ -738,39 +888,85 @@ var Entry = React.createClass({
 			' ',
 			isMap ? React.createElement(
 				'span',
-				null,
+				{
+					__source: {
+						fileName: '../../../src/components/Entry.jsx',
+						lineNumber: 100
+					}
+				},
 				'{',
 				' ',
 				isMinRemovalDepth ? React.createElement(
 					'a',
-					{ href: '#', onClick: this.deletePath },
-					React.createElement('i', { className: 'fa fa-times-circle', style: { color: "#FD971F" } }),
+					{ href: '#', onClick: this.deletePath, __source: {
+							fileName: '../../../src/components/Entry.jsx',
+							lineNumber: 100
+						}
+					},
+					React.createElement('i', { className: 'fa fa-times-circle', style: { color: "#FD971F" }, __source: {
+							fileName: '../../../src/components/Entry.jsx',
+							lineNumber: 100
+						}
+					}),
 					' '
 				) : '',
 				value.map(function (v, k) {
-					return React.createElement(Entry, _extends({}, _this.props, { cursor: cursor, key: k, value: v, keyName: k, style: hideEntry }));
+					return React.createElement(Entry, _extends({}, _this.props, { cursor: cursor, key: k, value: v, keyName: k, style: hideEntry, __source: {
+							fileName: '../../../src/components/Entry.jsx',
+							lineNumber: 102
+						}
+					}));
 				}).toList(),
-				isMinEditDepth && !collapsed ? React.createElement(AddMapEntry, { cursor: this.props.cursor, keyName: this.props.keyName }) : '',
+				isMinEditDepth && !collapsed ? React.createElement(AddMapEntry, { cursor: this.props.cursor, keyName: this.props.keyName, __source: {
+						fileName: '../../../src/components/Entry.jsx',
+						lineNumber: 104
+					}
+				}) : '',
 				'}'
 			) : isList ? React.createElement(
 				'span',
-				null,
+				{
+					__source: {
+						fileName: '../../../src/components/Entry.jsx',
+						lineNumber: 107
+					}
+				},
 				'[',
 				' ',
 				isMinRemovalDepth ? React.createElement(
 					'a',
-					{ href: '#', onClick: this.deletePath },
-					React.createElement('i', { className: 'fa fa-times-circle', style: { color: "#FD971F" } }),
+					{ href: '#', onClick: this.deletePath, __source: {
+							fileName: '../../../src/components/Entry.jsx',
+							lineNumber: 107
+						}
+					},
+					React.createElement('i', { className: 'fa fa-times-circle', style: { color: "#FD971F" }, __source: {
+							fileName: '../../../src/components/Entry.jsx',
+							lineNumber: 107
+						}
+					}),
 					' '
 				) : '',
 				value.map(function (v, k) {
-					return React.createElement(Entry, _extends({}, _this.props, { cursor: cursor, key: k, value: v, keyName: k, style: hideEntry }));
+					return React.createElement(Entry, _extends({}, _this.props, { cursor: cursor, key: k, value: v, keyName: k, style: hideEntry, __source: {
+							fileName: '../../../src/components/Entry.jsx',
+							lineNumber: 109
+						}
+					}));
 				}).toList(),
-				isMinEditDepth && !collapsed ? React.createElement(AddListEntry, { cursor: this.props.cursor, keyName: this.props.keyName }) : '',
+				isMinEditDepth && !collapsed ? React.createElement(AddListEntry, { cursor: this.props.cursor, keyName: this.props.keyName, __source: {
+						fileName: '../../../src/components/Entry.jsx',
+						lineNumber: 111
+					}
+				}) : '',
 				']'
 			) : React.createElement(
 				'span',
-				{ style: inputContainerStyle },
+				{ style: inputContainerStyle, __source: {
+						fileName: '../../../src/components/Entry.jsx',
+						lineNumber: 113
+					}
+				},
 				'"',
 				React.createElement('input', {
 					type: 'text',
@@ -779,13 +975,25 @@ var Entry = React.createClass({
 					onBlur: this._onBlur,
 					onKeyUp: this._onKeyUp,
 					size: this.state.inputValue.length,
-					style: inputStyle
+					style: inputStyle,
+					__source: {
+						fileName: '../../../src/components/Entry.jsx',
+						lineNumber: 114
+					}
 				}),
 				'" ',
 				React.createElement(
 					'a',
-					{ href: '#', onClick: this.deletePath },
-					React.createElement('i', { className: 'fa fa-times-circle', style: { color: "#FD971F" } })
+					{ href: '#', onClick: this.deletePath, __source: {
+							fileName: '../../../src/components/Entry.jsx',
+							lineNumber: 122
+						}
+					},
+					React.createElement('i', { className: 'fa fa-times-circle', style: { color: "#FD971F" }, __source: {
+							fileName: '../../../src/components/Entry.jsx',
+							lineNumber: 122
+						}
+					})
 				)
 			)
 		);
@@ -795,13 +1003,15 @@ var Entry = React.createClass({
 module.exports = Entry;
 
 },{"./AddListEntry":"/Users/will/Code/resume/node_modules/immutable-editor/dist/components/AddListEntry.js","./AddMapEntry":"/Users/will/Code/resume/node_modules/immutable-editor/dist/components/AddMapEntry.js","immutable":"immutable","immutable/contrib/cursor":"/Users/will/Code/resume/node_modules/immutable/contrib/cursor/index.js","object-assign":"/Users/will/Code/resume/node_modules/object-assign/index.js","react":"react"}],"/Users/will/Code/resume/node_modules/immutable-editor/dist/index.js":[function(require,module,exports){
-// index.js
-
 'use strict';
+
+// index.js
 
 module.exports = require('./components/Editor');
 
 },{"./components/Editor":"/Users/will/Code/resume/node_modules/immutable-editor/dist/components/Editor.js"}],"/Users/will/Code/resume/node_modules/immutable-editor/dist/libs/FileSaver.js":[function(require,module,exports){
+"use strict";
+
 /* FileSaver.js
  * A saveAs() FileSaver implementation.
  * 1.1.20150716
@@ -816,22 +1026,21 @@ module.exports = require('./components/Editor');
 
 /*! @source http://purl.eligrey.com/github/FileSaver.js/blob/master/FileSaver.js */
 
-"use strict";
-
 var saveAs = saveAs || (function (view) {
-	"use strict";
+	"use strict"
 	// IE <10 is explicitly unsupported
+	;
 	if (typeof navigator !== "undefined" && /MSIE [1-9]\./.test(navigator.userAgent)) {
 		return;
 	}
-	var doc = view.document,
-	   
+	var doc = view.document
 	// only get URL when necessary in case Blob.js hasn't overridden it yet
-	get_URL = function get_URL() {
+	,
+	    get_URL = function get_URL() {
 		return view.URL || view.webkitURL || view;
 	},
 	    save_link = doc.createElementNS("http://www.w3.org/1999/xhtml", "a"),
-	    can_use_save_link = ("download" in save_link),
+	    can_use_save_link = "download" in save_link,
 	    click = function click(node) {
 		var event = new MouseEvent("click");
 		node.dispatchEvent(event);
@@ -844,14 +1053,14 @@ var saveAs = saveAs || (function (view) {
 		}, 0);
 	},
 	    force_saveable_type = "application/octet-stream",
-	    fs_min_size = 0,
-	   
+	    fs_min_size = 0
 	// See https://code.google.com/p/chromium/issues/detail?id=375297#c7 and
 	// https://github.com/eligrey/FileSaver.js/commit/485930a#commitcomment-8768047
 	// for the reasoning behind the timeout and revocation flow
-	arbitrary_revoke_timeout = 500,
-	    // in ms
-	revoke = function revoke(file) {
+	,
+	    arbitrary_revoke_timeout = 500 // in ms
+	,
+	    revoke = function revoke(file) {
 		var revoker = function revoker() {
 			if (typeof file === "string") {
 				// file is an object URL
@@ -900,10 +1109,10 @@ var saveAs = saveAs || (function (view) {
 		    target_view,
 		    dispatch_all = function dispatch_all() {
 			dispatch(filesaver, "writestart progress write writeend".split(" "));
-		},
-		   
+		}
 		// on any filesys errors revert to saving with object URLs
-		fs_error = function fs_error() {
+		,
+		    fs_error = function fs_error() {
 			// don't create more object URLs than needed
 			if (blob_changed || !object_url) {
 				object_url = get_URL().createObjectURL(blob);
@@ -1084,7 +1293,7 @@ var HistoryModel = assign({}, EventEmitter.prototype, {
 	removeChangeListener: function removeChangeListener(cb) {
 		this.removeListener(CHANGE_EVENT, cb);
 	},
-	'new': function _new(newModel) {
+	new: function _new(newModel) {
 		_model = newModel;
 		this.emitChange();
 	},
