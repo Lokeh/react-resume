@@ -21,10 +21,12 @@ const Basics = React.createClass({
 				<h1 style={{fontSize: "3em", fontWeight: "normal"}}>{basicInfo.get('name')}<small style={{fontSize: ".5em", color: "#666", display: "block" }}>{basicInfo.get('label')}</small></h1>
 				<ClearFix />
 				{(() => {
-					const location = basicInfo.get('location');
-					return (<address style={{marginBottom: "10px", paddingLeft: "5px", textAlign: "right"}}>
-							{location.get('address')}, {location.get('city')}, {location.get('postalCode')}
-							</address>);
+					// if (basicInfo.has('location')) {
+					// 	const location = basicInfo.get('location');
+					// 	return (<address style={{marginBottom: "10px", paddingLeft: "5px", textAlign: "right"}}>
+					// 		{location.get('address')} {location.get('city')}, {location.get('postalCode')}
+					// 		</address>);
+					// }
 				})()}
 				<Card initiallyExpanded zDepth={0}>
 					<CardTitle title="About Me" />
