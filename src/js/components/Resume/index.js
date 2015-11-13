@@ -1,3 +1,3 @@
 // index.js
 
-module.exports = require('./Resume.jsx');
+module.exports = require('./Resume');

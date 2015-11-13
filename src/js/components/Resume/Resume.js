@@ -15,13 +15,13 @@ const Colors = mui.Styles.Colors;
 const { AppBar, Snackbar } = mui;
 
 // components
-const Basics = require('./Basics.jsx');
-const Work = require('./Work.jsx');
-const Volunteer = require('./Volunteer.jsx');
-const Education = require('./Education.jsx');
-const Awards = require('./Awards.jsx');
-const Publications = require('./Publications.jsx');
-const Skills = require('./Skills.jsx');
+const Basics = require('./Basics');
+const Work = require('./Work');
+const Volunteer = require('./Volunteer');
+const Education = require('./Education');
+const Awards = require('./Awards');
+const Publications = require('./Publications');
+const Skills = require('./Skills');
 
 const Resume = React.createClass({
 	childContextTypes: {
