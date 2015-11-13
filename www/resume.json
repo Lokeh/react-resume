@@ -1,0 +1,146 @@
+{
+  "basics": {
+    "summary": "A mathematician-turned-software-developer, I am passionate about finding clear, elegant solutions to complex problems. I look to improve not only my ability to solve engineering problems, but also to communicate them and make them accessible to the people that need them. In my spare time, I also enjoy competing and teaching in the sport Brazilian Jiu-Jitsu and working on open source.",
+    "profiles": [
+      {
+        "network": "Twitter",
+        "username": "lilactown_",
+        "url": "https://twitter.com/lilactown_"
+      },
+      {
+        "network": "GitHub",
+        "username": "Lokeh",
+        "url": "https://github.com/Lokeh"
+      }
+    ],
+    "name": "William Acton",
+    "label": "Front End Developer",
+    "location": {
+      "address": "",
+      "postalCode": "OR 97201",
+      "city": "Portland",
+      "countryCode": "US",
+      "region": "Oregon"
+    },
+    "website": "http://willacton.com",
+    "email": "hello@willacton.com",
+    "picture": ""
+  },
+  "skills": [
+    {
+      "name": "JavaScript",
+      "level": "Excellent",
+      "keywords": [
+        "React",
+        "jQuery",
+        "AngularJS",
+        "node.js"
+      ]
+    },
+    {
+      "name": "Front End Dev Tools",
+      "level": "Excellent",
+      "keywords": [
+      	"Git",
+      	"Grunt",
+      	"Browserify",
+      	"Babel",
+      	"Webpack"
+      ]
+    },
+    {
+      "name": "Web Development",
+      "level": "Excellent",
+      "keywords": [
+        "HTML5",
+        "CSS3",
+        "Sass/SCSS"
+      ]
+    },
+    {
+      "name": "Unit Testing",
+      "level": "Competent",
+      "keywords": [
+        "Mocha",
+        "QUnit",
+        "node-assert"
+      ]
+    },
+    {
+      "name": "Other Languages",
+      "level": "Competent",
+      "keywords": [
+        "Python",
+        "PHP",
+        "CoffeeScript"
+      ]
+    }
+  ],
+  "work": [
+    {
+      "company": "Cambia Health Solutions",
+      "position": "Front End Developer",
+      "website": "",
+      "startDate": "2014-09-01",
+      "endDate": "Present",
+      "summary": "Cambia Health Solutions is a nonprofit health insurance corporation based in Portland, Oregon. As a Front End Developer, I was in charge of developing member-facing website features, specifically focusing on dynamic single page applications interacting with RESTful APIs. Development technologies included jQuery, QUnit, React, Grunt and Sass.",
+      "highlights": [
+        "Planned, implemented and trained peers on new standards and tooling for unit testing",
+        "Development of single page applications interacting with RESTful APIs for our member base using modern front-end technology",
+        "Took leadership over planning / research of new tools, frameworks and design architectures for future development projects",
+        "Mentored student / junior developers in front-end development best practices."
+      ]
+    },
+    {
+      "company": "Linktech Worldwide",
+      "position": "Web Product Fulfillment",
+      "startDate": "2014-02-15",
+      "endDate": "2014-08-15",
+      "summary": "At Linktech Worldwide, I was in charge of customizing WordPress sites to client specs. Heavy use of HTML and CSS3, alongside JavaScript and PHP. "
+    }
+  ],
+  "education": [
+    {
+      "institution": "Portland State University",
+      "area": "B.S. in Mathematics",
+      "studyType": "Bachelor",
+      "startDate": "2010-09-25",
+      "endDate": "2014-06-15",
+      "gpa": "3.3",
+      "courses": [
+        "CS 163 - Data Structures",
+        "CS 201 - Computer Systems Programming",
+        "CS 250 - Discrete Structures",
+        "Discrete Mathematics",
+        "Applied Linear Algebra",
+        "Mathematical Modeling",
+        "Advanced Linear/Multilinear Algebra"
+      ]
+    }
+  ],
+  "volunteer": [],
+  "awards": [],
+  "publications": [],
+  "languages": [
+    {
+      "language": "English",
+      "fluency": "Native speaker"
+    }
+  ],
+  "interests": [
+    {
+      "name": "Martial Arts & Fitness",
+      "keywords": [
+        "Brazilian Jiu Jitsu",
+        "Weightlifting",
+        "Nutrition"
+      ]
+    }
+  ],
+  "references": [
+    {
+      "name": "Erlich Bachman",
+      "reference": "It is my pleasure to recommend Richard, his performance working as a consultant for Main St. Company proved that he will be a valuable addition to any company."
+    }
+  ]
+}
