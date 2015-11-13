@@ -1,7 +1,7 @@
 // get resume
-const Promise = require('bluebird');
+import Promise from 'bluebird';
 
-function getResumeJSON(url) {
+export default function getResumeJSON(url) {
 	return new Promise((resolve, reject) => {
 		const xhr = new XMLHttpRequest();
 		xhr.open('get', url);
@@ -28,5 +28,3 @@ function getResumeJSON(url) {
 		xhr.send();
 	});
 }
-
-module.exports = getResumeJSON;

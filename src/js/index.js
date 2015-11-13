@@ -1,19 +1,18 @@
 // init
 
-const React = require('react');
-const injectTapEventPlugin = require("react-tap-event-plugin");
-const Immutable = require('immutable');
-const {List, Map} = Immutable;
-const diff = require('immutablediff');
+import React from 'react';
+import injectTapEventPlugin from "react-tap-event-plugin";
+import Immutable, {List, Map} from 'immutable';
+import diff from 'immutablediff';
 injectTapEventPlugin();
 React.initializeTouchEvents();
 
-const ResumeModel = require('./models/ResumeModel');
-const getResumeJSON = require('./libs/getResumeJSON');
+import ResumeModel from './models/ResumeModel';
+import getResumeJSON from './libs/getResumeJSON';
 
-const Resume = require('./components/Resume');
-const Editor = require('immutable-editor').default;
-const Toolbar = require('./components/Toolbar');
+import Resume from './components/Resume';
+import Editor from 'immutable-editor';
+import Toolbar from './components/Toolbar';
 
 const appStyle = {
 	fontFamily: "Roboto, sans-serif",

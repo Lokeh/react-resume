@@ -1,8 +1,8 @@
 // Skills
-const React = require('react');
+import React from 'react';
 
 // Material UI
-const { Card, CardTitle, CardText, FlatButton, CardHeader, Avatar } = require('material-ui');
+import { Card, CardTitle, CardText, FlatButton, CardHeader, Avatar } from 'material-ui';
 
 const Skills = React.createClass({
 	render() {
@@ -33,4 +33,4 @@ const Skills = React.createClass({
 	}
 });
 
-module.exports = Skills;
+export default Skills;

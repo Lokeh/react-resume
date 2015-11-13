@@ -1,8 +1,8 @@
 // Awards
-const React = require('react');
+import React from 'react';
 
 // Material UI
-const { Card, CardTitle, CardText } = require('material-ui');
+import { Card, CardTitle, CardText } from 'material-ui';
 
 const Awards = React.createClass({
 	render() {
@@ -28,4 +28,4 @@ const Awards = React.createClass({
 	}
 });
 
-module.exports = Awards;
+export default Awards;

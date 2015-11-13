@@ -1,8 +1,8 @@
 // Education
-const React = require('react');
+import React from 'react';
 
 // Material UI
-const { Card, CardTitle, CardText } = require('material-ui');
+import { Card, CardTitle, CardText } from 'material-ui';
 
 const Education = React.createClass({
 	render() {
@@ -33,4 +33,4 @@ const Education = React.createClass({
 	}
 });
 
-module.exports = Education;
+export default Education;

@@ -1,9 +1,9 @@
 // Work
-const React = require('react');
-const Map = require('immutable').Map;
+import React from 'react';
+import {Map} from 'immutable';
 
 // Material UI
-const { Card, CardTitle, CardText } = require('material-ui');
+import { Card, CardTitle, CardText } from 'material-ui';
 
 const Work = React.createClass({
 	render() {
@@ -37,4 +37,4 @@ const Work = React.createClass({
 	}
 });
 
-module.exports = Work;
+export default Work;

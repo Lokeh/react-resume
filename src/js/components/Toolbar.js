@@ -1,8 +1,8 @@
 // Toolbar
-const React = require('react');
+import React from 'react';
 
 // Material UI
-const mui = require('material-ui');
+import mui from 'material-ui';
 const ThemeManager = new mui.Styles.ThemeManager();
 const Colors = mui.Styles.Colors;
 const RaisedButton = mui.RaisedButton;
@@ -49,4 +49,4 @@ const EditorToolBar = React.createClass({
 	}
 });
 
-module.exports = EditorToolBar;
+export default EditorToolBar;

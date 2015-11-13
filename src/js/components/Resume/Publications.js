@@ -1,8 +1,8 @@
 // Publications
-const React = require('react');
+import React from 'react';
 
 // Material UI
-const { Card, CardTitle, CardText } = require('material-ui');
+import { Card, CardTitle, CardText } from 'material-ui';
 
 const Publications = React.createClass({
 	render() {
@@ -29,4 +29,4 @@ const Publications = React.createClass({
 	}
 });
 
-module.exports = Publications;
+export default Publications;

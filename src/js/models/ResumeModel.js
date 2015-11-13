@@ -1,11 +1,11 @@
-const Immutable = require('immutable');
-const EventEmitter = require('events');
-const assign = require('object-assign');
+import Immutable from 'immutable';
+import EventEmitter from 'events';
+import assign from 'object-assign';
 const CHANGE_EVENT = 'change';
 
 let _Model = Immutable.Map({});
 
-const ResumeModel = assign({}, EventEmitter.prototype, {
+export default assign({}, EventEmitter.prototype, {
 	getAll() {
 		return _Model;
 	},
@@ -36,5 +36,3 @@ const ResumeModel = assign({}, EventEmitter.prototype, {
 		this.new(_Model.deleteIn(path));
 	}
 });
-
-module.exports = ResumeModel;

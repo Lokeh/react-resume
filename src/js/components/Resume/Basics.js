@@ -1,7 +1,7 @@
-const React = require('react');
+import React from 'react';
 
 // Material UI
-const { Card, CardTitle, CardText, ClearFix, IconButton } = require('material-ui');
+import { Card, CardTitle, CardText, ClearFix, IconButton } from 'material-ui';
 
 const Basics = React.createClass({
 	render() {
@@ -37,4 +37,4 @@ const Basics = React.createClass({
 	}
 });
 
-module.exports = Basics;
+export default Basics;

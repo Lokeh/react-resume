@@ -1,8 +1,8 @@
 // Volunteer
-const React = require('react');
+import React from 'react';
 
 // Material UI
-const { Card, CardTitle, CardText } = require('material-ui');
+import { Card, CardTitle, CardText } from 'material-ui';
 
 const Volunteer = React.createClass({
 	render() {
@@ -36,5 +36,5 @@ const Volunteer = React.createClass({
 	}
 });
 
-module.exports = Volunteer;
+export default Volunteer;
 
