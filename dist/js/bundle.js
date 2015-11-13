@@ -20543,333 +20543,14 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = function injectTapEventPlugin () {
-	  var React = __webpack_require__(1);
-	  React.initializeTouchEvents(true);
-
 	  __webpack_require__(69).injection.injectEventPluginsByName({
-	    "ResponderEventPlugin": __webpack_require__(158),
-	    "TapEventPlugin":       __webpack_require__(159)
+	    "TapEventPlugin":       __webpack_require__(158)
 	  });
 	};
 
 
 /***/ },
 /* 158 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Copyright 2013-2014, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 *
-	 * @providesModule ResponderEventPlugin
-	 */
-
-	"use strict";
-
-	var EventConstants = __webpack_require__(5);
-	var EventPluginUtils = __webpack_require__(4);
-	var EventPropagators = __webpack_require__(93);
-	var SyntheticEvent = __webpack_require__(97);
-
-	var accumulateInto = __webpack_require__(71);
-	var keyOf = __webpack_require__(39);
-
-	var isStartish = EventPluginUtils.isStartish;
-	var isMoveish = EventPluginUtils.isMoveish;
-	var isEndish = EventPluginUtils.isEndish;
-	var executeDirectDispatch = EventPluginUtils.executeDirectDispatch;
-	var hasDispatches = EventPluginUtils.hasDispatches;
-	var executeDispatchesInOrderStopAtTrue =
-	  EventPluginUtils.executeDispatchesInOrderStopAtTrue;
-
-	/**
-	 * ID of element that should respond to touch/move types of interactions, as
-	 * indicated explicitly by relevant callbacks.
-	 */
-	var responderID = null;
-	var isPressing = false;
-
-	var eventTypes = {
-	  /**
-	   * On a `touchStart`/`mouseDown`, is it desired that this element become the
-	   * responder?
-	   */
-	  startShouldSetResponder: {
-	    phasedRegistrationNames: {
-	      bubbled: keyOf({onStartShouldSetResponder: null}),
-	      captured: keyOf({onStartShouldSetResponderCapture: null})
-	    }
-	  },
-
-	  /**
-	   * On a `scroll`, is it desired that this element become the responder? This
-	   * is usually not needed, but should be used to retroactively infer that a
-	   * `touchStart` had occured during momentum scroll. During a momentum scroll,
-	   * a touch start will be immediately followed by a scroll event if the view is
-	   * currently scrolling.
-	   */
-	  scrollShouldSetResponder: {
-	    phasedRegistrationNames: {
-	      bubbled: keyOf({onScrollShouldSetResponder: null}),
-	      captured: keyOf({onScrollShouldSetResponderCapture: null})
-	    }
-	  },
-
-	  /**
-	   * On a `touchMove`/`mouseMove`, is it desired that this element become the
-	   * responder?
-	   */
-	  moveShouldSetResponder: {
-	    phasedRegistrationNames: {
-	      bubbled: keyOf({onMoveShouldSetResponder: null}),
-	      captured: keyOf({onMoveShouldSetResponderCapture: null})
-	    }
-	  },
-
-	  /**
-	   * Direct responder events dispatched directly to responder. Do not bubble.
-	   */
-	  responderMove: {registrationName: keyOf({onResponderMove: null})},
-	  responderRelease: {registrationName: keyOf({onResponderRelease: null})},
-	  responderTerminationRequest: {
-	    registrationName: keyOf({onResponderTerminationRequest: null})
-	  },
-	  responderGrant: {registrationName: keyOf({onResponderGrant: null})},
-	  responderReject: {registrationName: keyOf({onResponderReject: null})},
-	  responderTerminate: {registrationName: keyOf({onResponderTerminate: null})}
-	};
-
-	/**
-	 * Performs negotiation between any existing/current responder, checks to see if
-	 * any new entity is interested in becoming responder, performs that handshake
-	 * and returns any events that must be emitted to notify the relevant parties.
-	 *
-	 * A note about event ordering in the `EventPluginHub`.
-	 *
-	 * Suppose plugins are injected in the following order:
-	 *
-	 * `[R, S, C]`
-	 *
-	 * To help illustrate the example, assume `S` is `SimpleEventPlugin` (for
-	 * `onClick` etc) and `R` is `ResponderEventPlugin`.
-	 *
-	 * "Deferred-Dispatched Events":
-	 *
-	 * - The current event plugin system will traverse the list of injected plugins,
-	 *   in order, and extract events by collecting the plugin's return value of
-	 *   `extractEvents()`.
-	 * - These events that are returned from `extractEvents` are "deferred
-	 *   dispatched events".
-	 * - When returned from `extractEvents`, deferred-dispatched events contain an
-	 *   "accumulation" of deferred dispatches.
-	 * - These deferred dispatches are accumulated/collected before they are
-	 *   returned, but processed at a later time by the `EventPluginHub` (hence the
-	 *   name deferred).
-	 *
-	 * In the process of returning their deferred-dispatched events, event plugins
-	 * themselves can dispatch events on-demand without returning them from
-	 * `extractEvents`. Plugins might want to do this, so that they can use event
-	 * dispatching as a tool that helps them decide which events should be extracted
-	 * in the first place.
-	 *
-	 * "On-Demand-Dispatched Events":
-	 *
-	 * - On-demand-dispatched events are not returned from `extractEvents`.
-	 * - On-demand-dispatched events are dispatched during the process of returning
-	 *   the deferred-dispatched events.
-	 * - They should not have side effects.
-	 * - They should be avoided, and/or eventually be replaced with another
-	 *   abstraction that allows event plugins to perform multiple "rounds" of event
-	 *   extraction.
-	 *
-	 * Therefore, the sequence of event dispatches becomes:
-	 *
-	 * - `R`s on-demand events (if any)   (dispatched by `R` on-demand)
-	 * - `S`s on-demand events (if any)   (dispatched by `S` on-demand)
-	 * - `C`s on-demand events (if any)   (dispatched by `C` on-demand)
-	 * - `R`s extracted events (if any)   (dispatched by `EventPluginHub`)
-	 * - `S`s extracted events (if any)   (dispatched by `EventPluginHub`)
-	 * - `C`s extracted events (if any)   (dispatched by `EventPluginHub`)
-	 *
-	 * In the case of `ResponderEventPlugin`: If the `startShouldSetResponder`
-	 * on-demand dispatch returns `true` (and some other details are satisfied) the
-	 * `onResponderGrant` deferred dispatched event is returned from
-	 * `extractEvents`. The sequence of dispatch executions in this case
-	 * will appear as follows:
-	 *
-	 * - `startShouldSetResponder` (`ResponderEventPlugin` dispatches on-demand)
-	 * - `touchStartCapture`       (`EventPluginHub` dispatches as usual)
-	 * - `touchStart`              (`EventPluginHub` dispatches as usual)
-	 * - `responderGrant/Reject`   (`EventPluginHub` dispatches as usual)
-	 *
-	 * @param {string} topLevelType Record from `EventConstants`.
-	 * @param {string} topLevelTargetID ID of deepest React rendered element.
-	 * @param {object} nativeEvent Native browser event.
-	 * @return {*} An accumulation of synthetic events.
-	 */
-	function setResponderAndExtractTransfer(
-	    topLevelType,
-	    topLevelTargetID,
-	    nativeEvent) {
-	  var shouldSetEventType =
-	    isStartish(topLevelType) ? eventTypes.startShouldSetResponder :
-	    isMoveish(topLevelType) ? eventTypes.moveShouldSetResponder :
-	    eventTypes.scrollShouldSetResponder;
-
-	  var bubbleShouldSetFrom = responderID || topLevelTargetID;
-	  var shouldSetEvent = SyntheticEvent.getPooled(
-	    shouldSetEventType,
-	    bubbleShouldSetFrom,
-	    nativeEvent
-	  );
-	  EventPropagators.accumulateTwoPhaseDispatches(shouldSetEvent);
-	  var wantsResponderID = executeDispatchesInOrderStopAtTrue(shouldSetEvent);
-	  if (!shouldSetEvent.isPersistent()) {
-	    shouldSetEvent.constructor.release(shouldSetEvent);
-	  }
-
-	  if (!wantsResponderID || wantsResponderID === responderID) {
-	    return null;
-	  }
-	  var extracted;
-	  var grantEvent = SyntheticEvent.getPooled(
-	    eventTypes.responderGrant,
-	    wantsResponderID,
-	    nativeEvent
-	  );
-
-	  EventPropagators.accumulateDirectDispatches(grantEvent);
-	  if (responderID) {
-	    var terminationRequestEvent = SyntheticEvent.getPooled(
-	      eventTypes.responderTerminationRequest,
-	      responderID,
-	      nativeEvent
-	    );
-	    EventPropagators.accumulateDirectDispatches(terminationRequestEvent);
-	    var shouldSwitch = !hasDispatches(terminationRequestEvent) ||
-	      executeDirectDispatch(terminationRequestEvent);
-	    if (!terminationRequestEvent.isPersistent()) {
-	      terminationRequestEvent.constructor.release(terminationRequestEvent);
-	    }
-
-	    if (shouldSwitch) {
-	      var terminateType = eventTypes.responderTerminate;
-	      var terminateEvent = SyntheticEvent.getPooled(
-	        terminateType,
-	        responderID,
-	        nativeEvent
-	      );
-	      EventPropagators.accumulateDirectDispatches(terminateEvent);
-	      extracted = accumulateInto(extracted, [grantEvent, terminateEvent]);
-	      responderID = wantsResponderID;
-	    } else {
-	      var rejectEvent = SyntheticEvent.getPooled(
-	        eventTypes.responderReject,
-	        wantsResponderID,
-	        nativeEvent
-	      );
-	      EventPropagators.accumulateDirectDispatches(rejectEvent);
-	      extracted = accumulateInto(extracted, rejectEvent);
-	    }
-	  } else {
-	    extracted = accumulateInto(extracted, grantEvent);
-	    responderID = wantsResponderID;
-	  }
-	  return extracted;
-	}
-
-	/**
-	 * A transfer is a negotiation between a currently set responder and the next
-	 * element to claim responder status. Any start event could trigger a transfer
-	 * of responderID. Any move event could trigger a transfer, so long as there is
-	 * currently a responder set (in other words as long as the user is pressing
-	 * down).
-	 *
-	 * @param {string} topLevelType Record from `EventConstants`.
-	 * @return {boolean} True if a transfer of responder could possibly occur.
-	 */
-	function canTriggerTransfer(topLevelType) {
-	  return topLevelType === EventConstants.topLevelTypes.topScroll ||
-	         isStartish(topLevelType) ||
-	         (isPressing && isMoveish(topLevelType));
-	}
-
-	/**
-	 * Event plugin for formalizing the negotiation between claiming locks on
-	 * receiving touches.
-	 */
-	var ResponderEventPlugin = {
-
-	  getResponderID: function() {
-	    return responderID;
-	  },
-
-	  eventTypes: eventTypes,
-
-	  /**
-	   * @param {string} topLevelType Record from `EventConstants`.
-	   * @param {DOMEventTarget} topLevelTarget The listening component root node.
-	   * @param {string} topLevelTargetID ID of `topLevelTarget`.
-	   * @param {object} nativeEvent Native browser event.
-	   * @return {*} An accumulation of synthetic events.
-	   * @see {EventPluginHub.extractEvents}
-	   */
-	  extractEvents: function(
-	      topLevelType,
-	      topLevelTarget,
-	      topLevelTargetID,
-	      nativeEvent) {
-	    var extracted;
-	    // Must have missed an end event - reset the state here.
-	    if (responderID && isStartish(topLevelType)) {
-	      responderID = null;
-	    }
-	    if (isStartish(topLevelType)) {
-	      isPressing = true;
-	    } else if (isEndish(topLevelType)) {
-	      isPressing = false;
-	    }
-	    if (canTriggerTransfer(topLevelType)) {
-	      var transfer = setResponderAndExtractTransfer(
-	        topLevelType,
-	        topLevelTargetID,
-	        nativeEvent
-	      );
-	      if (transfer) {
-	        extracted = accumulateInto(extracted, transfer);
-	      }
-	    }
-	    // Now that we know the responder is set correctly, we can dispatch
-	    // responder type events (directly to the responder).
-	    var type = isMoveish(topLevelType) ? eventTypes.responderMove :
-	      isEndish(topLevelType) ? eventTypes.responderRelease :
-	      isStartish(topLevelType) ? eventTypes.responderStart : null;
-	    if (type) {
-	      var gesture = SyntheticEvent.getPooled(
-	        type,
-	        responderID || '',
-	        nativeEvent
-	      );
-	      EventPropagators.accumulateDirectDispatches(gesture);
-	      extracted = accumulateInto(extracted, gesture);
-	    }
-	    if (type === eventTypes.responderRelease) {
-	      responderID = null;
-	    }
-	    return extracted;
-	  }
-
-	};
-
-	module.exports = ResponderEventPlugin;
-
-
-/***/ },
-/* 159 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -20897,10 +20578,10 @@
 	var EventPluginUtils = __webpack_require__(4);
 	var EventPropagators = __webpack_require__(93);
 	var SyntheticUIEvent = __webpack_require__(106);
-	var TouchEventUtils = __webpack_require__(160);
+	var TouchEventUtils = __webpack_require__(159);
 	var ViewportMetrics = __webpack_require__(74);
 
-	var keyOf = __webpack_require__(39);
+	var keyOf = __webpack_require__(160);
 	var topLevelTypes = EventConstants.topLevelTypes;
 
 	var isStartish = EventPluginUtils.isStartish;
@@ -20949,19 +20630,18 @@
 	  );
 	}
 
+	var touchEvents = [
+	  topLevelTypes.topTouchStart,
+	  topLevelTypes.topTouchCancel,
+	  topLevelTypes.topTouchEnd,
+	  topLevelTypes.topTouchMove,
+	];
+
 	var dependencies = [
 	  topLevelTypes.topMouseDown,
 	  topLevelTypes.topMouseMove,
-	  topLevelTypes.topMouseUp
-	];
-
-	if (EventPluginUtils.useTouchEvents) {
-	  dependencies.push(
-	    topLevelTypes.topTouchEnd,
-	    topLevelTypes.topTouchStart,
-	    topLevelTypes.topTouchMove
-	  );
-	}
+	  topLevelTypes.topMouseUp,
+	].concat(touchEvents);
 
 	var eventTypes = {
 	  touchTap: {
@@ -20973,14 +20653,16 @@
 	  }
 	};
 
-	var now = function() {
+	var now = (function() {
 	  if (Date.now) {
-	    return Date.now();
+	    return Date.now;
 	  } else {
 	    // IE8 support: http://stackoverflow.com/questions/9430357/please-explain-why-and-how-new-date-works-as-workaround-for-date-now-in
-	    return +new Date;
+	    return function () {
+	      return +new Date;
+	    }
 	  }
-	}
+	})();
 
 	var TapEventPlugin = {
 
@@ -21002,7 +20684,8 @@
 	      topLevelType,
 	      topLevelTarget,
 	      topLevelTargetID,
-	      nativeEvent) {
+	      nativeEvent,
+	      nativeEventTarget) {
 
 	    if (isTouch(topLevelType)) {
 	      lastTouchEvent = now();
@@ -21021,7 +20704,8 @@
 	      event = SyntheticUIEvent.getPooled(
 	        eventTypes.touchTap,
 	        topLevelTargetID,
-	        nativeEvent
+	        nativeEvent,
+	        nativeEventTarget
 	      );
 	    }
 	    if (isStartish(topLevelType)) {
@@ -21041,7 +20725,7 @@
 
 
 /***/ },
-/* 160 */
+/* 159 */
 /***/ function(module, exports) {
 
 	/**
@@ -21087,6 +20771,46 @@
 
 	module.exports = TouchEventUtils;
 
+
+/***/ },
+/* 160 */
+/***/ function(module, exports) {
+
+	/**
+	 * Copyright 2013-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule keyOf
+	 */
+
+	/**
+	 * Allows extraction of a minified key. Let's the build system minify keys
+	 * without losing the ability to dynamically use key strings as values
+	 * themselves. Pass in an object with a single key/val pair and it will return
+	 * you the string key of that single record. Suppose you want to grab the
+	 * value for a key 'className' inside of an object. Key/val minification may
+	 * have aliased that key to be 'xa12'. keyOf({className: null}) will return
+	 * 'xa12' in that case. Resolve keys you want to use once at startup time, then
+	 * reuse those resolutions.
+	 */
+	"use strict";
+
+	var keyOf = function (oneKeyObj) {
+	  var key;
+	  for (key in oneKeyObj) {
+	    if (!oneKeyObj.hasOwnProperty(key)) {
+	      continue;
+	    }
+	    return key;
+	  }
+	  return null;
+	};
+
+	module.exports = keyOf;
 
 /***/ },
 /* 161 */
@@ -21162,7 +20886,21 @@
 	  }
 
 	  function wrapIndex(iter, index) {
-	    return index >= 0 ? (+index) : ensureSize(iter) + (+index);
+	    // This implements "is array index" which the ECMAString spec defines as:
+	    //     A String property name P is an array index if and only if
+	    //     ToString(ToUint32(P)) is equal to P and ToUint32(P) is not equal
+	    //     to 2^32−1.
+	    // However note that we're currently calling ToNumber() instead of ToUint32()
+	    // which should be improved in the future, as floating point numbers should
+	    // not be accepted as an array index.
+	    if (typeof index !== 'number') {
+	      var numIndex = +index;
+	      if ('' + numIndex !== index) {
+	        return NaN;
+	      }
+	      index = numIndex;
+	    }
+	    return index < 0 ? ensureSize(iter) + index : index;
 	  }
 
 	  function returnTrue() {
@@ -21832,7 +21570,7 @@
 	  var src_Math__imul =
 	    typeof Math.imul === 'function' && Math.imul(0xffffffff, 2) === -2 ?
 	    Math.imul :
-	    function src_Math__imul(a, b) {
+	    function imul(a, b) {
 	      a = a | 0; // int
 	      b = b | 0; // int
 	      var c = a & 0xffff;
@@ -22383,6 +22121,15 @@
 	  function sliceFactory(iterable, begin, end, useKeys) {
 	    var originalSize = iterable.size;
 
+	    // Sanitize begin & end using this shorthand for ToInt32(argument)
+	    // http://www.ecma-international.org/ecma-262/6.0/#sec-toint32
+	    if (begin !== undefined) {
+	      begin = begin | 0;
+	    }
+	    if (end !== undefined) {
+	      end = end | 0;
+	    }
+
 	    if (wholeSlice(begin, end, originalSize)) {
 	      return iterable;
 	    }
@@ -22409,7 +22156,9 @@
 
 	    var sliceSeq = makeSequence(iterable);
 
-	    sliceSeq.size = sliceSize;
+	    // If iterable.size is undefined, the size of the realized sliceSeq is
+	    // unknown at this point unless the number of items to slice is 0
+	    sliceSeq.size = sliceSize === 0 ? sliceSize : iterable.size && sliceSize || undefined;
 
 	    if (!useKeys && isSeq(iterable) && sliceSize >= 0) {
 	      sliceSeq.get = function (index, notSetValue) {
@@ -22858,7 +22607,7 @@
 
 	    function src_Map__Map(value) {
 	      return value === null || value === undefined ? emptyMap() :
-	        isMap(value) ? value :
+	        isMap(value) && !isOrdered(value) ? value :
 	        emptyMap().withMutations(function(map ) {
 	          var iter = KeyedIterable(value);
 	          assertNotInfinite(iter.size);
@@ -23705,12 +23454,12 @@
 
 	    List.prototype.get = function(index, notSetValue) {
 	      index = wrapIndex(this, index);
-	      if (index < 0 || index >= this.size) {
-	        return notSetValue;
+	      if (index >= 0 && index < this.size) {
+	        index += this._origin;
+	        var node = listNodeFor(this, index);
+	        return node && node.array[index & MASK];
 	      }
-	      index += this._origin;
-	      var node = listNodeFor(this, index);
-	      return node && node.array[index & MASK];
+	      return notSetValue;
 	    };
 
 	    // @pragma Modification
@@ -23906,29 +23655,25 @@
 	    };
 
 	    VNode.prototype.removeAfter = function(ownerID, level, index) {
-	      if (index === level ? 1 << level : 0 || this.array.length === 0) {
+	      if (index === (level ? 1 << level : 0) || this.array.length === 0) {
 	        return this;
 	      }
 	      var sizeIndex = ((index - 1) >>> level) & MASK;
 	      if (sizeIndex >= this.array.length) {
 	        return this;
 	      }
-	      var removingLast = sizeIndex === this.array.length - 1;
+
 	      var newChild;
 	      if (level > 0) {
 	        var oldChild = this.array[sizeIndex];
 	        newChild = oldChild && oldChild.removeAfter(ownerID, level - SHIFT, index);
-	        if (newChild === oldChild && removingLast) {
+	        if (newChild === oldChild && sizeIndex === this.array.length - 1) {
 	          return this;
 	        }
 	      }
-	      if (removingLast && !newChild) {
-	        return this;
-	      }
+
 	      var editable = editableVNode(this, ownerID);
-	      if (!removingLast) {
-	        editable.array.pop();
-	      }
+	      editable.array.splice(sizeIndex + 1);
 	      if (newChild) {
 	        editable.array[sizeIndex] = newChild;
 	      }
@@ -24019,6 +23764,10 @@
 
 	  function updateList(list, index, value) {
 	    index = wrapIndex(list, index);
+
+	    if (index !== index) {
+	      return list;
+	    }
 
 	    if (index >= list.size || index < 0) {
 	      return list.withMutations(function(list ) {
@@ -24111,6 +23860,14 @@
 	  }
 
 	  function setListBounds(list, begin, end) {
+	    // Sanitize begin & end using this shorthand for ToInt32(argument)
+	    // http://www.ecma-international.org/ecma-262/6.0/#sec-toint32
+	    if (begin !== undefined) {
+	      begin = begin | 0;
+	    }
+	    if (end !== undefined) {
+	      end = end | 0;
+	    }
 	    var owner = list.__ownerID || new OwnerID();
 	    var oldOrigin = list._origin;
 	    var oldCapacity = list._capacity;
@@ -24623,7 +24380,7 @@
 
 	    function src_Set__Set(value) {
 	      return value === null || value === undefined ? emptySet() :
-	        isSet(value) ? value :
+	        isSet(value) && !isOrdered(value) ? value :
 	        emptySet().withMutations(function(set ) {
 	          var iter = SetIterable(value);
 	          assertNotInfinite(iter.size);
@@ -25368,10 +25125,6 @@
 	      return reify(this, concatFactory(this, values));
 	    },
 
-	    contains: function(searchValue) {
-	      return this.includes(searchValue);
-	    },
-
 	    includes: function(searchValue) {
 	      return this.some(function(value ) {return is(value, searchValue)});
 	    },
@@ -25661,7 +25414,7 @@
 
 	    hashCode: function() {
 	      return this.__hash || (this.__hash = hashIterable(this));
-	    },
+	    }
 
 
 	    // ### Internal
@@ -25684,6 +25437,7 @@
 	  IterablePrototype.inspect =
 	  IterablePrototype.toSource = function() { return this.toString(); };
 	  IterablePrototype.chain = IterablePrototype.flatMap;
+	  IterablePrototype.contains = IterablePrototype.includes;
 
 	  // Temporary warning about using length
 	  (function () {
@@ -25754,7 +25508,7 @@
 	          function(k, v)  {return mapper.call(context, k, v, this$0)}
 	        ).flip()
 	      );
-	    },
+	    }
 
 	  });
 
@@ -25809,7 +25563,10 @@
 	      if (numArgs === 0 || (numArgs === 2 && !removeNum)) {
 	        return this;
 	      }
-	      index = resolveBegin(index, this.size);
+	      // If index is negative, it should resolve relative to the size of the
+	      // collection. However size may be expensive to compute if not cached, so
+	      // only call count() if the number is in fact negative.
+	      index = resolveBegin(index, index < 0 ? this.count() : this.size);
 	      var spliced = this.slice(0, index);
 	      return reify(
 	        this,
@@ -25882,7 +25639,7 @@
 	      var iterables = arrCopy(arguments);
 	      iterables[0] = this;
 	      return reify(this, zipWithFactory(this, zipper, iterables));
-	    },
+	    }
 
 	  });
 
@@ -25908,7 +25665,7 @@
 
 	    keySeq: function() {
 	      return this.valueSeq();
-	    },
+	    }
 
 	  });
 
@@ -26012,7 +25769,7 @@
 	    Repeat: Repeat,
 
 	    is: is,
-	    fromJS: fromJS,
+	    fromJS: fromJS
 
 	  };
 
@@ -26477,11 +26234,18 @@
 	        break;
 	      // slower
 	      default:
-	        args = Array.prototype.slice.call(arguments, 1);
+	        len = arguments.length;
+	        args = new Array(len - 1);
+	        for (i = 1; i < len; i++)
+	          args[i - 1] = arguments[i];
 	        handler.apply(this, args);
 	    }
 	  } else if (isObject(handler)) {
-	    args = Array.prototype.slice.call(arguments, 1);
+	    len = arguments.length;
+	    args = new Array(len - 1);
+	    for (i = 1; i < len; i++)
+	      args[i - 1] = arguments[i];
+
 	    listeners = handler.slice();
 	    len = listeners.length;
 	    for (i = 0; i < len; i++)
@@ -26519,6 +26283,7 @@
 
 	  // Check for listener leak
 	  if (isObject(this._events[type]) && !this._events[type].warned) {
+	    var m;
 	    if (!isUndefined(this._maxListeners)) {
 	      m = this._maxListeners;
 	    } else {
@@ -26640,7 +26405,7 @@
 
 	  if (isFunction(listeners)) {
 	    this.removeListener(type, listeners);
-	  } else if (listeners) {
+	  } else {
 	    // LIFO order
 	    while (listeners.length)
 	      this.removeListener(type, listeners[listeners.length - 1]);
@@ -26661,20 +26426,15 @@
 	  return ret;
 	};
 
-	EventEmitter.prototype.listenerCount = function(type) {
-	  if (this._events) {
-	    var evlistener = this._events[type];
-
-	    if (isFunction(evlistener))
-	      return 1;
-	    else if (evlistener)
-	      return evlistener.length;
-	  }
-	  return 0;
-	};
-
 	EventEmitter.listenerCount = function(emitter, type) {
-	  return emitter.listenerCount(type);
+	  var ret;
+	  if (!emitter._events || !emitter._events[type])
+	    ret = 0;
+	  else if (isFunction(emitter._events[type]))
+	    ret = 1;
+	  else
+	    ret = emitter._events[type].length;
+	  return ret;
 	};
 
 	function isFunction(arg) {
@@ -26784,7 +26544,7 @@
 	/* WEBPACK VAR INJECTION */(function(process, global, setImmediate) {/* @preserve
 	 * The MIT License (MIT)
 	 * 
-	 * Copyright (c) 2014 Petka Antonov
+	 * Copyright (c) 2013-2015 Petka Antonov
 	 * 
 	 * Permission is hereby granted, free of charge, to any person obtaining a copy
 	 * of this software and associated documentation files (the "Software"), to deal
@@ -26806,7 +26566,7 @@
 	 * 
 	 */
 	/**
-	 * bluebird build version 2.9.34
+	 * bluebird build version 2.10.2
 	 * Features enabled: core, race, call_get, generators, map, nodeify, promisify, props, reduce, settle, some, cancel, using, filter, any, each, timers
 	*/
 	!function(e){if(true)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.Promise=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof _dereq_=="function"&&_dereq_;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof _dereq_=="function"&&_dereq_;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
@@ -27863,6 +27623,8 @@
 	                    (!!process.env["BLUEBIRD_DEBUG"] ||
 	                     process.env["NODE_ENV"] === "development"));
 
+	if (util.isNode && process.env["BLUEBIRD_DEBUG"] == 0) debugging = false;
+
 	if (debugging) {
 	    async.disableTrampolineIfNecessary();
 	}
@@ -28053,6 +27815,8 @@
 	            undefined,
 	            undefined
 	       );
+	    } else if (value instanceof Promise) {
+	        value._ignoreRejections();
 	    }
 	    return this._then(returner, undefined, undefined, value, undefined);
 	};
@@ -28993,6 +28757,7 @@
 	}
 	util.notEnumerableProp(Promise, "_getDomain", getDomain);
 
+	var UNDEFINED_BINDING = {};
 	var async = _dereq_("./async.js");
 	var errors = _dereq_("./errors.js");
 	var TypeError = Promise.TypeError = errors.TypeError;
@@ -29277,7 +29042,9 @@
 	        ? this._receiver0
 	        : this[
 	            index * 5 - 5 + 4];
-	    if (ret === undefined && this._isBound()) {
+	    if (ret === UNDEFINED_BINDING) {
+	        return undefined;
+	    } else if (ret === undefined && this._isBound()) {
 	        return this._boundValue();
 	    }
 	    return ret;
@@ -29322,6 +29089,7 @@
 	    var promise = follower._promiseAt(index);
 	    var receiver = follower._receiverAt(index);
 	    if (promise instanceof Promise) promise._setIsMigrated();
+	    if (receiver === undefined) receiver = UNDEFINED_BINDING;
 	    this._addCallbacks(fulfill, reject, progress, promise, receiver, null);
 	};
 
@@ -30232,11 +30000,16 @@
 	        var key = methods[i];
 	        var fn = methods[i+1];
 	        var promisifiedKey = key + suffix;
-	        obj[promisifiedKey] = promisifier === makeNodePromisified
-	                ? makeNodePromisified(key, THIS, key, fn, suffix)
-	                : promisifier(fn, function() {
-	                    return makeNodePromisified(key, THIS, key, fn, suffix);
-	                });
+	        if (promisifier === makeNodePromisified) {
+	            obj[promisifiedKey] =
+	                makeNodePromisified(key, THIS, key, fn, suffix);
+	        } else {
+	            var promisified = promisifier(fn, function() {
+	                return makeNodePromisified(key, THIS, key, fn, suffix);
+	            });
+	            util.notEnumerableProp(promisified, "__isPromisified__", true);
+	            obj[promisifiedKey] = promisified;
+	        }
 	    }
 	    util.toFastProperties(obj);
 	    return obj;
@@ -31057,10 +30830,16 @@
 
 	var afterTimeout = function (promise, message) {
 	    if (!promise.isPending()) return;
-	    if (typeof message !== "string") {
-	        message = "operation timed out";
+	    
+	    var err;
+	    if(!util.isPrimitive(message) && (message instanceof Error)) {
+	        err = message;
+	    } else {
+	        if (typeof message !== "string") {
+	            message = "operation timed out";
+	        }
+	        err = new TimeoutError(message);
 	    }
-	    var err = new TimeoutError(message);
 	    util.markAsOriginatingFromRejection(err);
 	    promise._attachExtraTrace(err);
 	    promise._cancel(err);
@@ -31247,10 +31026,20 @@
 	                        "you must pass at least 2 arguments to Promise.using");
 	        var fn = arguments[len - 1];
 	        if (typeof fn !== "function") return apiRejection("fn must be a function\u000a\u000a    See http://goo.gl/916lJJ\u000a");
-	        len--;
+
+	        var input;
+	        var spreadArgs = true;
+	        if (len === 2 && Array.isArray(arguments[0])) {
+	            input = arguments[0];
+	            len = input.length;
+	            spreadArgs = false;
+	        } else {
+	            input = arguments;
+	            len--;
+	        }
 	        var resources = new Array(len);
 	        for (var i = 0; i < len; ++i) {
-	            var resource = arguments[i];
+	            var resource = input[i];
 	            if (Disposer.isDisposer(resource)) {
 	                var disposer = resource;
 	                resource = resource.promise();
@@ -31274,7 +31063,8 @@
 	                promise._pushContext();
 	                var ret;
 	                try {
-	                    ret = fn.apply(undefined, vals);
+	                    ret = spreadArgs
+	                        ? fn.apply(undefined, vals) : fn.call(undefined,  vals);
 	                } finally {
 	                    promise._popContext();
 	                }
@@ -52667,9 +52457,18 @@
 
 	'use strict';
 
-	// index.js
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 
-	module.exports = __webpack_require__(339);
+	var _Editor = __webpack_require__(339);
+
+	Object.defineProperty(exports, 'default', {
+	  enumerable: true,
+	  get: function get() {
+	    return _Editor.Editor;
+	  }
+	});
 
 
 /***/ },
@@ -52680,21 +52479,46 @@
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	// Top-level component
-	var React = __webpack_require__(1);
-	var Immutable = __webpack_require__(161);
-	var Map = Immutable.Map;
-	var List = Immutable.List;
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-	var Cursor = __webpack_require__(340);
-	var fs = __webpack_require__(341);
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.Editor = undefined;
 
-	var HistoryModel = __webpack_require__(344);
+	var _react = __webpack_require__(1);
 
-	var Entry = __webpack_require__(345);
-	// const Toolbar = require('./Toolbar');
-	var AddMapEntry = __webpack_require__(346);
-	var AddListEntry = __webpack_require__(347);
+	var _react2 = _interopRequireDefault(_react);
+
+	var _immutable = __webpack_require__(161);
+
+	var _immutable2 = _interopRequireDefault(_immutable);
+
+	var _cursor = __webpack_require__(340);
+
+	var _cursor2 = _interopRequireDefault(_cursor);
+
+	var _FileSaver = __webpack_require__(341);
+
+	var _FileSaver2 = _interopRequireDefault(_FileSaver);
+
+	var _HistoryModel = __webpack_require__(344);
+
+	var _HistoryModel2 = _interopRequireDefault(_HistoryModel);
+
+	var _Entry = __webpack_require__(345);
+
+	var _AddMapEntry = __webpack_require__(346);
+
+	var _AddListEntry = __webpack_require__(347);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // Top-level component
 
 	var editorStyle = {
 		background: '#282828',
@@ -52704,112 +52528,129 @@
 		WebkitFontSmoothing: "initial"
 	};
 
-	var Editor = React.createClass({
-		displayName: 'Editor',
+	var Editor = exports.Editor = (function (_Component) {
+		_inherits(Editor, _Component);
 
-		statics: {
-			undo: function undo() {
-				var immutable = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+		function Editor() {
+			_classCallCheck(this, Editor);
 
-				HistoryModel.incOffset();
-				var nextState = HistoryModel.get(HistoryModel.getAll().offset);
-				// this.props.cursor.update((v) => { return nextState; });
-				return immutable ? nextState : nextState.toJS();
-			},
-			redo: function redo() {
-				var immutable = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+			return _possibleConstructorReturn(this, Object.getPrototypeOf(Editor).apply(this, arguments));
+		}
 
-				HistoryModel.decOffset();
-				var nextState = HistoryModel.get(HistoryModel.getAll().offset);
-				// this.props.cursor.update((v) => { return nextState; });
-				return immutable ? nextState : nextState.toJS();
-			},
-			save: function save(name) {
-				var blob = new Blob([JSON.stringify(HistoryModel.get(HistoryModel.getAll().offset).toJS())], { type: "application/json;charset=utf-8" });
-				fs.saveAs(blob, name);
+		_createClass(Editor, [{
+			key: 'componentDidMount',
+			value: function componentDidMount() {
+				_HistoryModel2.default.push(_immutable2.default.fromJS(this.props.data));
 			}
-		},
-		propTypes: {
-			data: React.PropTypes.object.isRequired,
-			onUpdate: React.PropTypes.func.isRequired,
-			immutable: React.PropTypes.bool,
-			minEditDepth: React.PropTypes.number,
-			minRemovalDepth: React.PropTypes.number
-		},
-		componentDidMount: function componentDidMount() {
-			HistoryModel.push(Immutable.fromJS(this.props.data));
-		},
-		shouldComponentUpdate: function shouldComponentUpdate(nextProps) {
-			return this.props.data !== nextProps.data;
-		},
-		render: function render() {
-			var _this = this;
+		}, {
+			key: 'shouldComponentUpdate',
+			value: function shouldComponentUpdate(nextProps) {
+				return this.props.data !== nextProps.data;
+			}
+		}, {
+			key: 'render',
+			value: function render() {
+				var _this2 = this;
 
-			var data = Immutable.fromJS(this.props.data);
+				var data = _immutable2.default.fromJS(this.props.data);
 
-			var rootCursor = Cursor.from(data, function (newData, oldData, path) {
-				console.log(newData !== oldData);
-				if (newData !== oldData) {
-					HistoryModel.push(newData);
-					_this.props.onUpdate(_this.props.immutable ? newData : newData.toJS());
-				}
-			});
-
-			var isMap = Map.isMap(this.props.data);
-			var isList = List.isList(this.props.data);
-			return React.createElement(
-				'div',
-				{ style: editorStyle, __source: {
-						fileName: '../../../src/components/Editor.jsx',
-						lineNumber: 69
+				var rootCursor = _cursor2.default.from(data, function (newData, oldData, path) {
+					if (newData !== oldData) {
+						console.log(_HistoryModel2.default.getAll().history.toJS());
+						_HistoryModel2.default.push(newData);
+						_this2.props.onUpdate(_this2.props.immutable ? newData : newData.toJS());
 					}
-				},
-				React.createElement(
+				});
+
+				var isMap = _immutable.Map.isMap(data);
+				var isList = _immutable.List.isList(data);
+				return _react2.default.createElement(
 					'div',
-					{ style: { margin: "0px 10px" }, __source: {
-							fileName: '../../../src/components/Editor.jsx',
-							lineNumber: 70
+					{ style: editorStyle, __source: {
+							fileName: '../../../src/components/Editor.js',
+							lineNumber: 60
 						}
 					},
-					isMap ? '{' : '[',
-					React.createElement(
+					_react2.default.createElement(
 						'div',
-						{ style: { marginLeft: "5px" }, __source: {
-								fileName: '../../../src/components/Editor.jsx',
-								lineNumber: 73
+						{ style: { margin: "0px 10px" }, __source: {
+								fileName: '../../../src/components/Editor.js',
+								lineNumber: 61
 							}
 						},
-						data.map(function (entry, key) {
-							return React.createElement(Entry, _extends({}, _this.props, {
-								cursor: rootCursor,
-								value: entry,
-								key: key,
-								keyName: key,
-								__source: {
-									fileName: '../../../src/components/Editor.jsx',
-									lineNumber: 75
+						isMap ? '{' : '[',
+						_react2.default.createElement(
+							'div',
+							{ style: { marginLeft: "5px" }, __source: {
+									fileName: '../../../src/components/Editor.js',
+									lineNumber: 64
 								}
-							}));
-						}).toList(),
-						this.props.minEditDepth === 0 ? isMap ? React.createElement(AddMapEntry, { cursor: rootCursor, __source: {
-								fileName: '../../../src/components/Editor.jsx',
-								lineNumber: 85
-							}
-						}) : React.createElement(AddListEntry, { cursor: rootCursor, __source: {
-								fileName: '../../../src/components/Editor.jsx',
-								lineNumber: 86
-							}
-						}) : ''
-					),
-					isMap ? '}' : ']'
-				)
-			);
-		}
-	});
+							},
+							data.map(function (entry, key) {
+								return _react2.default.createElement(_Entry.Entry, _extends({}, _this2.props, {
+									cursor: rootCursor,
+									value: entry,
+									key: key,
+									keyName: key,
+									__source: {
+										fileName: '../../../src/components/Editor.js',
+										lineNumber: 66
+									}
+								}));
+							}).toList(),
+							this.props.minEditDepth === 0 ? isMap ? _react2.default.createElement(_AddMapEntry.AddMapEntry, { cursor: rootCursor, __source: {
+									fileName: '../../../src/components/Editor.js',
+									lineNumber: 76
+								}
+							}) : _react2.default.createElement(_AddListEntry.AddListEntry, { cursor: rootCursor, __source: {
+									fileName: '../../../src/components/Editor.js',
+									lineNumber: 77
+								}
+							}) : ''
+						),
+						isMap ? '}' : ']'
+					)
+				);
+			}
+		}], [{
+			key: 'undo',
+			value: function undo() {
+				var immutable = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
-	window.HistoryModel = HistoryModel;
+				_HistoryModel2.default.incOffset();
+				var nextState = _HistoryModel2.default.get(_HistoryModel2.default.getAll().offset);
+				console.log(nextState.toJS());
+				// this.props.cursor.update((v) => { return nextState; });
+				return immutable ? nextState : nextState.toJS();
+			}
+		}, {
+			key: 'redo',
+			value: function redo() {
+				var immutable = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
-	module.exports = Editor;
+				_HistoryModel2.default.decOffset();
+				var nextState = _HistoryModel2.default.get(_HistoryModel2.default.getAll().offset);
+				// this.props.cursor.update((v) => { return nextState; });
+				return immutable ? nextState : nextState.toJS();
+			}
+		}, {
+			key: 'save',
+			value: function save(name) {
+				var blob = new Blob([JSON.stringify(_HistoryModel2.default.get(_HistoryModel2.default.getAll().offset).toJS())], { type: "application/json;charset=utf-8" });
+				_FileSaver2.default.saveAs(blob, name);
+			}
+		}]);
+
+		return Editor;
+	})(_react.Component);
+
+	Editor.propTypes = {
+		data: _react2.default.PropTypes.object.isRequired,
+		onUpdate: _react2.default.PropTypes.func.isRequired,
+		immutable: _react2.default.PropTypes.bool,
+		minEditDepth: _react2.default.PropTypes.number,
+		minRemovalDepth: _react2.default.PropTypes.number
+	};
 
 
 /***/ },
@@ -52904,7 +52745,11 @@
 
 	IndexedCursorPrototype.set =
 	KeyedCursorPrototype.set = function(key, value) {
-	  return updateCursor(this, function (m) { return m.set(key, value); }, [key]);
+	  if(arguments.length === 1) {
+	    return updateCursor(this, function() { return key; }, []);
+	  } else {
+	    return updateCursor(this, function (m) { return m.set(key, value); }, [key]);
+	  }
 	}
 
 	IndexedCursorPrototype.push = function(/* values */) {
@@ -53440,17 +53285,32 @@
 
 	'use strict';
 
-	var Immutable = __webpack_require__(161);
-	var EventEmitter = __webpack_require__(167);
-	var assign = __webpack_require__(168);
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _immutable = __webpack_require__(161);
+
+	var _immutable2 = _interopRequireDefault(_immutable);
+
+	var _events = __webpack_require__(167);
+
+	var _events2 = _interopRequireDefault(_events);
+
+	var _objectAssign = __webpack_require__(168);
+
+	var _objectAssign2 = _interopRequireDefault(_objectAssign);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 	var CHANGE_EVENT = 'change';
 
 	var _model = {
-		history: Immutable.List([]),
+		history: _immutable2.default.List([]),
 		offset: 1
 	};
 
-	var HistoryModel = assign({}, EventEmitter.prototype, {
+	var HistoryModel = (0, _objectAssign2.default)({}, _events2.default.prototype, {
 		getAll: function getAll() {
 			return _model;
 		},
@@ -53468,11 +53328,12 @@
 			this.emitChange();
 		},
 		push: function push(value) {
-			if (!_model.history.includes(value)) {
-				_model.history = _model.history.skipLast(_model.offset - 1).push(value);
-				_model.offset = 1;
-				this.emitChange();
-			}
+			// console.log(!_model.history.includes(value));
+			// if (!_model.history.includes(value)) {
+			_model.history = _model.history.skipLast(_model.offset - 1).push(value);
+			_model.offset = 1;
+			this.emitChange();
+			// }
 		},
 		pop: function pop() {
 			var last = _model.last();
@@ -53499,7 +53360,7 @@
 		}
 	});
 
-	module.exports = HistoryModel;
+	exports.default = HistoryModel;
 
 
 /***/ },
@@ -53510,16 +53371,40 @@
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var React = __webpack_require__(1);
-	var Immutable = __webpack_require__(161);
-	var Cursor = __webpack_require__(340);
-	var List = Immutable.List;
-	var Map = Immutable.Map;
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-	var assign = __webpack_require__(168);
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.Entry = undefined;
 
-	var AddMapEntry = __webpack_require__(346);
-	var AddListEntry = __webpack_require__(347);
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _immutable = __webpack_require__(161);
+
+	var _immutable2 = _interopRequireDefault(_immutable);
+
+	var _cursor = __webpack_require__(340);
+
+	var _cursor2 = _interopRequireDefault(_cursor);
+
+	var _objectAssign = __webpack_require__(168);
+
+	var _objectAssign2 = _interopRequireDefault(_objectAssign);
+
+	var _AddMapEntry = __webpack_require__(346);
+
+	var _AddListEntry = __webpack_require__(347);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	var inputStyle = {
 		fontFamily: '"Source Code Pro", monospace',
@@ -53536,207 +53421,248 @@
 	};
 
 	// fontSize: '11px'
-	var Entry = React.createClass({
-		displayName: 'Entry',
 
-		propTypes: {
-			keyName: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.number]).isRequired,
-			value: React.PropTypes.oneOfType([React.PropTypes.instanceOf(List), React.PropTypes.instanceOf(Map), React.PropTypes.string]).isRequired,
-			minEditDepth: React.PropTypes.number,
-			minRemovalDepth: React.PropTypes.number
-		},
-		getInitialState: function getInitialState() {
-			return {
+	var Entry = exports.Entry = (function (_Component) {
+		_inherits(Entry, _Component);
+
+		function Entry(props) {
+			_classCallCheck(this, Entry);
+
+			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Entry).call(this, props));
+
+			_this.state = {
 				collapsed: false,
 				inputValue: ""
 			};
-		},
-		_onChange: function _onChange(e) {
-			this.setState({ inputValue: e.target.value });
-		},
-		_onBlur: function _onBlur(e) {
-			// update the model on blur
-			this.props.cursor.set(this.props.keyName, this.state.inputValue);
-		},
-		_onKeyUp: function _onKeyUp(e) {
-			// update the model on enter
-			if (e.key === "Enter") {
+			return _this;
+		}
+
+		_createClass(Entry, [{
+			key: '_onChange',
+			value: function _onChange(e) {
+				this.setState({ inputValue: e.target.value });
+			}
+		}, {
+			key: '_onBlur',
+			value: function _onBlur(e) {
+				// update the model on blur
 				this.props.cursor.set(this.props.keyName, this.state.inputValue);
 			}
-		},
-		deletePath: function deletePath(e) {
-			e.preventDefault();
-			this.props.cursor.delete(this.props.keyName);
-		},
-		toggleCollapsed: function toggleCollapsed(e) {
-			e.preventDefault();
-			this.setState({ collapsed: !this.state.collapsed });
-		},
-		componentWillMount: function componentWillMount() {
-			this.setState({
-				inputValue: this.props.value
-			});
-		},
-		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-			this.setState({
-				inputValue: nextProps.value
-			});
-		},
-		shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
-			return this.props.value !== nextProps.value || this.props.style !== nextProps.style || this.state.collapsed !== nextState.collapsed || this.state.inputValue !== nextState.inputValue || this.props.cursor !== nextProps.cursor;
-		},
-		render: function render() {
-			var _this = this;
+		}, {
+			key: '_onKeyUp',
+			value: function _onKeyUp(e) {
+				// update the model on enter
+				if (e.key === "Enter") {
+					this.props.cursor.set(this.props.keyName, this.state.inputValue);
+				}
+			}
+		}, {
+			key: 'deletePath',
+			value: function deletePath(e) {
+				e.preventDefault();
+				this.props.cursor.delete(this.props.keyName);
+			}
+		}, {
+			key: 'toggleCollapsed',
+			value: function toggleCollapsed(e) {
+				e.preventDefault();
+				this.setState({ collapsed: !this.state.collapsed });
+			}
+		}, {
+			key: 'componentWillMount',
+			value: function componentWillMount() {
+				this.setState({
+					inputValue: this.props.value
+				});
+			}
+		}, {
+			key: 'componentWillReceiveProps',
+			value: function componentWillReceiveProps(nextProps) {
+				this.setState({
+					inputValue: nextProps.value
+				});
+			}
+		}, {
+			key: 'shouldComponentUpdate',
+			value: function shouldComponentUpdate(nextProps, nextState) {
+				return this.props.value !== nextProps.value || this.props.style !== nextProps.style || this.state.collapsed !== nextState.collapsed || this.state.inputValue !== nextState.inputValue || this.props.cursor !== nextProps.cursor;
+			}
+		}, {
+			key: 'render',
+			value: function render() {
+				var _this2 = this;
 
-			var cursor = this.props.cursor.get(this.props.keyName);
-			var value = this.props.value;
-			var collapsed = this.state.collapsed;
+				var cursor = this.props.cursor.get(this.props.keyName);
+				var value = this.props.value;
+				var collapsed = this.state.collapsed;
 
-			var isMinRemovalDepth = this.props.cursor['_keyPath'].length + 1 >= this.props.minRemovalDepth;
-			var isMinEditDepth = this.props.cursor['_keyPath'].length + 1 >= this.props.minEditDepth;
-			var isMap = Map.isMap(value);
-			var isList = List.isList(value);
+				var isMinRemovalDepth = this.props.cursor['_keyPath'].length + 1 >= this.props.minRemovalDepth;
+				var isMinEditDepth = this.props.cursor['_keyPath'].length + 1 >= this.props.minEditDepth;
+				var isMap = _immutable.Map.isMap(value);
+				var isList = _immutable.List.isList(value);
 
-			var hideEntry = { display: collapsed ? 'none' : 'block' };
-			return React.createElement(
-				'div',
-				{ style: assign({ marginLeft: "20px" }, this.props.style), __source: {
-						fileName: '../../../src/components/Entry.jsx',
-						lineNumber: 96
-					}
-				},
-				isMap || isList ? React.createElement(
-					'a',
-					{ onClick: this.toggleCollapsed, __source: {
-							fileName: '../../../src/components/Entry.jsx',
-							lineNumber: 97
+				var hideEntry = { display: collapsed ? 'none' : 'block' };
+				return _react2.default.createElement(
+					'div',
+					{ style: (0, _objectAssign2.default)({ marginLeft: "20px" }, this.props.style), __source: {
+							fileName: '../../../src/components/Entry.js',
+							lineNumber: 84
 						}
 					},
-					React.createElement('i', { className: 'fa ' + (collapsed ? 'fa-plus-square' : 'fa-minus-square'), style: { color: "#FFD569", marginLeft: '-23px' }, __source: {
-							fileName: '../../../src/components/Entry.jsx',
-							lineNumber: 97
-						}
-					})
-				) : '',
-				' ',
-				this.props.keyName,
-				':',
-				' ',
-				isMap ? React.createElement(
-					'span',
-					{
-						__source: {
-							fileName: '../../../src/components/Entry.jsx',
-							lineNumber: 100
-						}
-					},
-					'{',
-					' ',
-					isMinRemovalDepth ? React.createElement(
+					isMap || isList ? _react2.default.createElement(
 						'a',
-						{ href: '#', onClick: this.deletePath, __source: {
-								fileName: '../../../src/components/Entry.jsx',
-								lineNumber: 100
+						{ onClick: function onClick(e) {
+								return _this2.toggleCollapsed(e);
+							}, __source: {
+								fileName: '../../../src/components/Entry.js',
+								lineNumber: 85
 							}
 						},
-						React.createElement('i', { className: 'fa fa-times-circle', style: { color: "#FD971F" }, __source: {
-								fileName: '../../../src/components/Entry.jsx',
-								lineNumber: 100
-							}
-						}),
-						' '
-					) : '',
-					value.map(function (v, k) {
-						return React.createElement(Entry, _extends({}, _this.props, { cursor: cursor, key: k, value: v, keyName: k, style: hideEntry, __source: {
-								fileName: '../../../src/components/Entry.jsx',
-								lineNumber: 102
-							}
-						}));
-					}).toList(),
-					isMinEditDepth && !collapsed ? React.createElement(AddMapEntry, { cursor: this.props.cursor, keyName: this.props.keyName, __source: {
-							fileName: '../../../src/components/Entry.jsx',
-							lineNumber: 104
-						}
-					}) : '',
-					'}'
-				) : isList ? React.createElement(
-					'span',
-					{
-						__source: {
-							fileName: '../../../src/components/Entry.jsx',
-							lineNumber: 107
-						}
-					},
-					'[',
-					' ',
-					isMinRemovalDepth ? React.createElement(
-						'a',
-						{ href: '#', onClick: this.deletePath, __source: {
-								fileName: '../../../src/components/Entry.jsx',
-								lineNumber: 107
-							}
-						},
-						React.createElement('i', { className: 'fa fa-times-circle', style: { color: "#FD971F" }, __source: {
-								fileName: '../../../src/components/Entry.jsx',
-								lineNumber: 107
-							}
-						}),
-						' '
-					) : '',
-					value.map(function (v, k) {
-						return React.createElement(Entry, _extends({}, _this.props, { cursor: cursor, key: k, value: v, keyName: k, style: hideEntry, __source: {
-								fileName: '../../../src/components/Entry.jsx',
-								lineNumber: 109
-							}
-						}));
-					}).toList(),
-					isMinEditDepth && !collapsed ? React.createElement(AddListEntry, { cursor: this.props.cursor, keyName: this.props.keyName, __source: {
-							fileName: '../../../src/components/Entry.jsx',
-							lineNumber: 111
-						}
-					}) : '',
-					']'
-				) : React.createElement(
-					'span',
-					{ style: inputContainerStyle, __source: {
-							fileName: '../../../src/components/Entry.jsx',
-							lineNumber: 113
-						}
-					},
-					'"',
-					React.createElement('input', {
-						type: 'text',
-						value: this.state.inputValue,
-						onChange: this._onChange,
-						onBlur: this._onBlur,
-						onKeyUp: this._onKeyUp,
-						size: this.state.inputValue.length,
-						style: inputStyle,
-						__source: {
-							fileName: '../../../src/components/Entry.jsx',
-							lineNumber: 114
-						}
-					}),
-					'" ',
-					React.createElement(
-						'a',
-						{ href: '#', onClick: this.deletePath, __source: {
-								fileName: '../../../src/components/Entry.jsx',
-								lineNumber: 122
-							}
-						},
-						React.createElement('i', { className: 'fa fa-times-circle', style: { color: "#FD971F" }, __source: {
-								fileName: '../../../src/components/Entry.jsx',
-								lineNumber: 122
+						_react2.default.createElement('i', { className: 'fa ' + (collapsed ? 'fa-plus-square' : 'fa-minus-square'), style: { color: "#FFD569", marginLeft: '-23px' }, __source: {
+								fileName: '../../../src/components/Entry.js',
+								lineNumber: 85
 							}
 						})
+					) : '',
+					' ',
+					this.props.keyName,
+					':',
+					' ',
+					isMap ? _react2.default.createElement(
+						'span',
+						{
+							__source: {
+								fileName: '../../../src/components/Entry.js',
+								lineNumber: 88
+							}
+						},
+						'{',
+						' ',
+						isMinRemovalDepth ? _react2.default.createElement(
+							'a',
+							{ href: '#', onClick: function onClick(e) {
+									return _this2.deletePath(e);
+								}, __source: {
+									fileName: '../../../src/components/Entry.js',
+									lineNumber: 88
+								}
+							},
+							_react2.default.createElement('i', { className: 'fa fa-times-circle', style: { color: "#FD971F" }, __source: {
+									fileName: '../../../src/components/Entry.js',
+									lineNumber: 88
+								}
+							}),
+							' '
+						) : '',
+						value.map(function (v, k) {
+							return _react2.default.createElement(Entry, _extends({}, _this2.props, { cursor: cursor, key: k, value: v, keyName: k, style: hideEntry, __source: {
+									fileName: '../../../src/components/Entry.js',
+									lineNumber: 90
+								}
+							}));
+						}).toList(),
+						isMinEditDepth && !collapsed ? _react2.default.createElement(_AddMapEntry.AddMapEntry, { cursor: this.props.cursor, keyName: this.props.keyName, __source: {
+								fileName: '../../../src/components/Entry.js',
+								lineNumber: 92
+							}
+						}) : '',
+						'}'
+					) : isList ? _react2.default.createElement(
+						'span',
+						{
+							__source: {
+								fileName: '../../../src/components/Entry.js',
+								lineNumber: 95
+							}
+						},
+						'[',
+						' ',
+						isMinRemovalDepth ? _react2.default.createElement(
+							'a',
+							{ href: '#', onClick: function onClick(e) {
+									return _this2.deletePath(e);
+								}, __source: {
+									fileName: '../../../src/components/Entry.js',
+									lineNumber: 95
+								}
+							},
+							_react2.default.createElement('i', { className: 'fa fa-times-circle', style: { color: "#FD971F" }, __source: {
+									fileName: '../../../src/components/Entry.js',
+									lineNumber: 95
+								}
+							}),
+							' '
+						) : '',
+						value.map(function (v, k) {
+							return _react2.default.createElement(Entry, _extends({}, _this2.props, { cursor: cursor, key: k, value: v, keyName: k, style: hideEntry, __source: {
+									fileName: '../../../src/components/Entry.js',
+									lineNumber: 97
+								}
+							}));
+						}).toList(),
+						isMinEditDepth && !collapsed ? _react2.default.createElement(_AddListEntry.AddListEntry, { cursor: this.props.cursor, keyName: this.props.keyName, __source: {
+								fileName: '../../../src/components/Entry.js',
+								lineNumber: 99
+							}
+						}) : '',
+						']'
+					) : _react2.default.createElement(
+						'span',
+						{ style: inputContainerStyle, __source: {
+								fileName: '../../../src/components/Entry.js',
+								lineNumber: 101
+							}
+						},
+						'"',
+						_react2.default.createElement('input', {
+							type: 'text',
+							value: this.state.inputValue,
+							onChange: function onChange(e) {
+								return _this2._onChange(e);
+							},
+							onBlur: function onBlur(e) {
+								return _this2._onBlur(e);
+							},
+							onKeyUp: function onKeyUp(e) {
+								return _this2._onKeyUp(e);
+							},
+							size: this.state.inputValue.length,
+							style: inputStyle,
+							__source: {
+								fileName: '../../../src/components/Entry.js',
+								lineNumber: 102
+							}
+						}),
+						'" ',
+						_react2.default.createElement(
+							'a',
+							{ href: '#', onClick: function onClick(e) {
+									return _this2.deletePath(e);
+								}, __source: {
+									fileName: '../../../src/components/Entry.js',
+									lineNumber: 110
+								}
+							},
+							_react2.default.createElement('i', { className: 'fa fa-times-circle', style: { color: "#FD971F" }, __source: {
+									fileName: '../../../src/components/Entry.js',
+									lineNumber: 110
+								}
+							})
+						)
 					)
-				)
-			);
-		}
-	});
+				);
+			}
+		}]);
 
-	module.exports = Entry;
+		return Entry;
+	})(_react.Component);
+
+	Entry.propTypes = {
+		keyName: _react2.default.PropTypes.oneOfType([_react2.default.PropTypes.string, _react2.default.PropTypes.number]).isRequired,
+		value: _react2.default.PropTypes.oneOfType([_react2.default.PropTypes.instanceOf(_immutable.List), _react2.default.PropTypes.instanceOf(_immutable.Map), _react2.default.PropTypes.string]).isRequired,
+		minEditDepth: _react2.default.PropTypes.number,
+		minRemovalDepth: _react2.default.PropTypes.number
+	};
 
 
 /***/ },
@@ -53745,10 +53671,28 @@
 
 	'use strict';
 
-	var React = __webpack_require__(1);
-	var Immutable = __webpack_require__(161);
-	var List = Immutable.List;
-	var Map = Immutable.Map;
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.AddMapEntry = undefined;
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _immutable = __webpack_require__(161);
+
+	var _immutable2 = _interopRequireDefault(_immutable);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	var inputStyle = {
 		fontFamily: '"Source Code Pro", monospace',
@@ -53758,172 +53702,203 @@
 		wordBreak: 'break-word'
 	};
 
-	var AddMapEntry = React.createClass({
-		displayName: 'AddMapEntry',
-		getInitialState: function getInitialState() {
-			return {
+	var AddMapEntry = exports.AddMapEntry = (function (_Component) {
+		_inherits(AddMapEntry, _Component);
+
+		function AddMapEntry() {
+			_classCallCheck(this, AddMapEntry);
+
+			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(AddMapEntry).call(this));
+
+			_this.state = {
 				showOptions: false,
 				keyName: "",
 				dataType: "string"
 			};
-		},
-		setPath: function setPath(e) {
-			e.preventDefault();
-			var types = {
-				map: Map({}),
-				list: List([]),
-				string: ""
-			};
-			if (this.props.keyName) {
-				this.props.cursor.get(this.props.keyName).set(this.state.keyName, types[this.state.dataType]);
-			} else {
-				this.props.cursor.set(this.state.keyName, types[this.state.dataType]);
+			return _this;
+		}
+
+		_createClass(AddMapEntry, [{
+			key: 'setPath',
+			value: function setPath(e) {
+				e.preventDefault();
+				var types = {
+					map: (0, _immutable.Map)({}),
+					list: (0, _immutable.List)([]),
+					string: ""
+				};
+				console.log(this.props.keyName);
+				if (this.props.keyName !== undefined) {
+					this.props.cursor.get(this.props.keyName).set(this.state.keyName, types[this.state.dataType]);
+				} else {
+					this.props.cursor.set(this.state.keyName, types[this.state.dataType]);
+				}
+				this.toggleOptions();
 			}
-			this.toggleOptions();
-		},
-		toggleOptions: function toggleOptions() {
-			this.setState({ showOptions: !this.state.showOptions });
-		},
-		setType: function setType(e) {
-			var dataType = e.target.value;
-			this.setState({ dataType: dataType });
-		},
-		setKey: function setKey(e) {
-			var keyName = e.target.value;
-			this.setState({ keyName: keyName });
-		},
-		render: function render() {
-			if (this.state.showOptions) {
-				return React.createElement(
-					'div',
-					{ style: { marginLeft: "20px" }, __source: {
-							fileName: '../../../src/components/AddMapEntry.jsx',
-							lineNumber: 50
-						}
-					},
-					React.createElement(
-						'label',
-						{ htmlFor: 'key', __source: {
-								fileName: '../../../src/components/AddMapEntry.jsx',
-								lineNumber: 51
-							}
-						},
-						'key:'
-					),
-					' ',
-					React.createElement('input', { name: 'key', type: 'text', onChange: this.setKey, __source: {
-							fileName: '../../../src/components/AddMapEntry.jsx',
-							lineNumber: 51
-						}
-					}),
-					React.createElement('br', {
-						__source: {
-							fileName: '../../../src/components/AddMapEntry.jsx',
-							lineNumber: 51
-						}
-					}),
-					React.createElement(
-						'label',
-						{ htmlFor: 'type', __source: {
-								fileName: '../../../src/components/AddMapEntry.jsx',
+		}, {
+			key: 'toggleOptions',
+			value: function toggleOptions() {
+				this.setState({ showOptions: !this.state.showOptions });
+			}
+		}, {
+			key: 'setType',
+			value: function setType(e) {
+				var dataType = e.target.value;
+				this.setState({ dataType: dataType });
+			}
+		}, {
+			key: 'setKey',
+			value: function setKey(e) {
+				var keyName = e.target.value;
+				this.setState({ keyName: keyName });
+			}
+		}, {
+			key: 'render',
+			value: function render() {
+				var _this2 = this;
+
+				if (this.state.showOptions) {
+					return _react2.default.createElement(
+						'div',
+						{ style: { marginLeft: "20px" }, __source: {
+								fileName: '../../../src/components/AddMapEntry.js',
 								lineNumber: 52
 							}
 						},
-						'type:'
-					),
-					' ',
-					React.createElement(
-						'select',
-						{ name: 'type', onChange: this.setType, __source: {
-								fileName: '../../../src/components/AddMapEntry.jsx',
-								lineNumber: 52
-							}
-						},
-						React.createElement(
-							'option',
-							{ value: 'string', __source: {
-									fileName: '../../../src/components/AddMapEntry.jsx',
+						_react2.default.createElement(
+							'label',
+							{ htmlFor: 'key', __source: {
+									fileName: '../../../src/components/AddMapEntry.js',
 									lineNumber: 53
 								}
 							},
-							'String'
+							'key:'
 						),
-						React.createElement(
-							'option',
-							{ value: 'map', __source: {
-									fileName: '../../../src/components/AddMapEntry.jsx',
+						' ',
+						_react2.default.createElement('input', { name: 'key', type: 'text', onChange: function onChange(e) {
+								return _this2.setKey(e);
+							}, __source: {
+								fileName: '../../../src/components/AddMapEntry.js',
+								lineNumber: 53
+							}
+						}),
+						_react2.default.createElement('br', {
+							__source: {
+								fileName: '../../../src/components/AddMapEntry.js',
+								lineNumber: 53
+							}
+						}),
+						_react2.default.createElement(
+							'label',
+							{ htmlFor: 'type', __source: {
+									fileName: '../../../src/components/AddMapEntry.js',
 									lineNumber: 54
 								}
 							},
-							'Map'
+							'type:'
 						),
-						React.createElement(
-							'option',
-							{ value: 'list', __source: {
-									fileName: '../../../src/components/AddMapEntry.jsx',
-									lineNumber: 55
+						' ',
+						_react2.default.createElement(
+							'select',
+							{ name: 'type', onChange: function onChange(e) {
+									return _this2.setType(e);
+								}, __source: {
+									fileName: '../../../src/components/AddMapEntry.js',
+									lineNumber: 54
 								}
 							},
-							'List'
+							_react2.default.createElement(
+								'option',
+								{ value: 'string', __source: {
+										fileName: '../../../src/components/AddMapEntry.js',
+										lineNumber: 55
+									}
+								},
+								'String'
+							),
+							_react2.default.createElement(
+								'option',
+								{ value: 'map', __source: {
+										fileName: '../../../src/components/AddMapEntry.js',
+										lineNumber: 56
+									}
+								},
+								'Map'
+							),
+							_react2.default.createElement(
+								'option',
+								{ value: 'list', __source: {
+										fileName: '../../../src/components/AddMapEntry.js',
+										lineNumber: 57
+									}
+								},
+								'List'
+							)
+						),
+						' ',
+						_react2.default.createElement(
+							'a',
+							{ href: '#', onClick: function onClick(e) {
+									return _this2.setPath(e);
+								}, __source: {
+									fileName: '../../../src/components/AddMapEntry.js',
+									lineNumber: 59
+								}
+							},
+							_react2.default.createElement('i', { className: 'fa fa-plus', style: { color: "#A6E22E" }, __source: {
+									fileName: '../../../src/components/AddMapEntry.js',
+									lineNumber: 59
+								}
+							})
+						),
+						' ',
+						_react2.default.createElement(
+							'a',
+							{ href: '#', onClick: function onClick(e) {
+									return _this2.toggleOptions(e);
+								}, __source: {
+									fileName: '../../../src/components/AddMapEntry.js',
+									lineNumber: 60
+								}
+							},
+							_react2.default.createElement('i', { className: 'fa fa-remove', style: { color: "#FD971F" }, __source: {
+									fileName: '../../../src/components/AddMapEntry.js',
+									lineNumber: 60
+								}
+							})
 						)
-					),
+					);
+				}
+				return _react2.default.createElement(
+					'div',
+					{ style: { marginLeft: "19px" }, __source: {
+							fileName: '../../../src/components/AddMapEntry.js',
+							lineNumber: 64
+						}
+					},
+					String.fromCharCode(8627),
 					' ',
-					React.createElement(
+					_react2.default.createElement(
 						'a',
-						{ href: '#', onClick: this.setPath, __source: {
-								fileName: '../../../src/components/AddMapEntry.jsx',
-								lineNumber: 57
+						{ href: '#', __source: {
+								fileName: '../../../src/components/AddMapEntry.js',
+								lineNumber: 64
 							}
 						},
-						React.createElement('i', { className: 'fa fa-plus', style: { color: "#A6E22E" }, __source: {
-								fileName: '../../../src/components/AddMapEntry.jsx',
-								lineNumber: 57
-							}
-						})
-					),
-					' ',
-					React.createElement(
-						'a',
-						{ href: '#', onClick: this.toggleOptions, __source: {
-								fileName: '../../../src/components/AddMapEntry.jsx',
-								lineNumber: 58
-							}
-						},
-						React.createElement('i', { className: 'fa fa-remove', style: { color: "#FD971F" }, __source: {
-								fileName: '../../../src/components/AddMapEntry.jsx',
-								lineNumber: 58
+						_react2.default.createElement('i', { onClick: function onClick(e) {
+								return _this2.toggleOptions(e);
+							}, className: 'fa fa-plus-circle', style: { color: "#A6E22E" }, __source: {
+								fileName: '../../../src/components/AddMapEntry.js',
+								lineNumber: 64
 							}
 						})
 					)
 				);
 			}
-			return React.createElement(
-				'div',
-				{ style: { marginLeft: "19px" }, __source: {
-						fileName: '../../../src/components/AddMapEntry.jsx',
-						lineNumber: 62
-					}
-				},
-				String.fromCharCode(8627),
-				' ',
-				React.createElement(
-					'a',
-					{ href: '#', __source: {
-							fileName: '../../../src/components/AddMapEntry.jsx',
-							lineNumber: 62
-						}
-					},
-					React.createElement('i', { onClick: this.toggleOptions, className: 'fa fa-plus-circle', style: { color: "#A6E22E" }, __source: {
-							fileName: '../../../src/components/AddMapEntry.jsx',
-							lineNumber: 62
-						}
-					})
-				)
-			);
-		}
-	});
+		}]);
 
-	module.exports = AddMapEntry;
+		return AddMapEntry;
+	})(_react.Component);
 
 
 /***/ },
@@ -53932,151 +53907,195 @@
 
 	'use strict';
 
-	var React = __webpack_require__(1);
-	var Immutable = __webpack_require__(161);
-	var List = Immutable.List;
-	var Map = Immutable.Map;
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-	var AddListEntry = React.createClass({
-		displayName: 'AddListEntry',
-		getInitialState: function getInitialState() {
-			return {
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.AddListEntry = undefined;
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _immutable = __webpack_require__(161);
+
+	var _immutable2 = _interopRequireDefault(_immutable);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var AddListEntry = exports.AddListEntry = (function (_Component) {
+		_inherits(AddListEntry, _Component);
+
+		function AddListEntry() {
+			_classCallCheck(this, AddListEntry);
+
+			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(AddListEntry).call(this));
+
+			_this.state = {
 				showOptions: false,
 				dataType: "string"
 			};
-		},
-		pushPath: function pushPath(e) {
-			e.preventDefault();
-			var types = {
-				map: new Map({}),
-				list: new List([]),
-				string: ""
-			};
-			if (this.props.keyName) {
-				this.props.cursor.get(this.props.keyName).push(types[this.state.dataType]);
-			} else {
-				this.props.cursor.push(types[this.state.dataType]);
+			return _this;
+		}
+
+		_createClass(AddListEntry, [{
+			key: 'pushPath',
+			value: function pushPath(e) {
+				e.preventDefault();
+				var types = {
+					map: new _immutable.Map({}),
+					list: new _immutable.List([]),
+					string: ""
+				};
+				if (this.props.keyName) {
+					this.props.cursor.get(this.props.keyName).push(types[this.state.dataType]);
+				} else {
+					this.props.cursor.push(types[this.state.dataType]);
+				}
+				this.toggleOptions();
 			}
-			this.toggleOptions();
-		},
-		toggleOptions: function toggleOptions() {
-			this.setState({ showOptions: !this.state.showOptions });
-		},
-		setType: function setType(e) {
-			var dataType = e.target.value;
-			this.setState({ dataType: dataType });
-		},
-		render: function render() {
-			if (this.state.showOptions) {
-				return React.createElement(
-					'div',
-					{ style: { marginLeft: "20px" }, __source: {
-							fileName: '../../../src/components/AddListEntry.jsx',
-							lineNumber: 37
-						}
-					},
-					React.createElement(
-						'label',
-						{ htmlFor: 'type', __source: {
-								fileName: '../../../src/components/AddListEntry.jsx',
+		}, {
+			key: 'toggleOptions',
+			value: function toggleOptions() {
+				this.setState({ showOptions: !this.state.showOptions });
+			}
+		}, {
+			key: 'setType',
+			value: function setType(e) {
+				var dataType = e.target.value;
+				this.setState({ dataType: dataType });
+			}
+		}, {
+			key: 'render',
+			value: function render() {
+				var _this2 = this;
+
+				if (this.state.showOptions) {
+					return _react2.default.createElement(
+						'div',
+						{ style: { marginLeft: "20px" }, __source: {
+								fileName: '../../../src/components/AddListEntry.js',
 								lineNumber: 38
 							}
 						},
-						'type:'
-					),
-					' ',
-					React.createElement(
-						'select',
-						{ name: 'type', onChange: this.setType, __source: {
-								fileName: '../../../src/components/AddListEntry.jsx',
-								lineNumber: 38
-							}
-						},
-						React.createElement(
-							'option',
-							{ value: 'string', __source: {
-									fileName: '../../../src/components/AddListEntry.jsx',
+						_react2.default.createElement(
+							'label',
+							{ htmlFor: 'type', __source: {
+									fileName: '../../../src/components/AddListEntry.js',
 									lineNumber: 39
 								}
 							},
-							'String'
+							'type:'
 						),
-						React.createElement(
-							'option',
-							{ value: 'map', __source: {
-									fileName: '../../../src/components/AddListEntry.jsx',
-									lineNumber: 40
+						' ',
+						_react2.default.createElement(
+							'select',
+							{ name: 'type', onChange: function onChange(e) {
+									return _this2.setType(e);
+								}, __source: {
+									fileName: '../../../src/components/AddListEntry.js',
+									lineNumber: 39
 								}
 							},
-							'Map'
+							_react2.default.createElement(
+								'option',
+								{ value: 'string', __source: {
+										fileName: '../../../src/components/AddListEntry.js',
+										lineNumber: 40
+									}
+								},
+								'String'
+							),
+							_react2.default.createElement(
+								'option',
+								{ value: 'map', __source: {
+										fileName: '../../../src/components/AddListEntry.js',
+										lineNumber: 41
+									}
+								},
+								'Map'
+							),
+							_react2.default.createElement(
+								'option',
+								{ value: 'list', __source: {
+										fileName: '../../../src/components/AddListEntry.js',
+										lineNumber: 42
+									}
+								},
+								'List'
+							)
 						),
-						React.createElement(
-							'option',
-							{ value: 'list', __source: {
-									fileName: '../../../src/components/AddListEntry.jsx',
-									lineNumber: 41
+						' ',
+						_react2.default.createElement(
+							'a',
+							{ href: '#', onClick: function onClick(e) {
+									return _this2.pushPath(e);
+								}, __source: {
+									fileName: '../../../src/components/AddListEntry.js',
+									lineNumber: 44
 								}
 							},
-							'List'
+							_react2.default.createElement('i', { className: 'fa fa-plus', style: { color: "#A6E22E" }, __source: {
+									fileName: '../../../src/components/AddListEntry.js',
+									lineNumber: 44
+								}
+							})
+						),
+						' ',
+						_react2.default.createElement(
+							'a',
+							{ href: '#', onClick: function onClick(e) {
+									return _this2.toggleOptions(e);
+								}, __source: {
+									fileName: '../../../src/components/AddListEntry.js',
+									lineNumber: 45
+								}
+							},
+							_react2.default.createElement('i', { className: 'fa fa-remove', style: { color: "#FD971F" }, __source: {
+									fileName: '../../../src/components/AddListEntry.js',
+									lineNumber: 45
+								}
+							})
 						)
-					),
+					);
+				}
+				return _react2.default.createElement(
+					'div',
+					{ style: { marginLeft: "19px" }, __source: {
+							fileName: '../../../src/components/AddListEntry.js',
+							lineNumber: 49
+						}
+					},
+					String.fromCharCode(8627),
 					' ',
-					React.createElement(
+					_react2.default.createElement(
 						'a',
-						{ href: '#', onClick: this.pushPath, __source: {
-								fileName: '../../../src/components/AddListEntry.jsx',
-								lineNumber: 43
+						{ href: '#', __source: {
+								fileName: '../../../src/components/AddListEntry.js',
+								lineNumber: 49
 							}
 						},
-						React.createElement('i', { className: 'fa fa-plus', style: { color: "#A6E22E" }, __source: {
-								fileName: '../../../src/components/AddListEntry.jsx',
-								lineNumber: 43
-							}
-						})
-					),
-					' ',
-					React.createElement(
-						'a',
-						{ href: '#', onClick: this.toggleOptions, __source: {
-								fileName: '../../../src/components/AddListEntry.jsx',
-								lineNumber: 44
-							}
-						},
-						React.createElement('i', { className: 'fa fa-remove', style: { color: "#FD971F" }, __source: {
-								fileName: '../../../src/components/AddListEntry.jsx',
-								lineNumber: 44
+						_react2.default.createElement('i', { onClick: function onClick(e) {
+								return _this2.toggleOptions(e);
+							}, className: 'fa fa-plus-circle add', style: { color: "#A6E22E" }, __source: {
+								fileName: '../../../src/components/AddListEntry.js',
+								lineNumber: 49
 							}
 						})
 					)
 				);
 			}
-			return React.createElement(
-				'div',
-				{ style: { marginLeft: "19px" }, __source: {
-						fileName: '../../../src/components/AddListEntry.jsx',
-						lineNumber: 48
-					}
-				},
-				String.fromCharCode(8627),
-				' ',
-				React.createElement(
-					'a',
-					{ href: '#', __source: {
-							fileName: '../../../src/components/AddListEntry.jsx',
-							lineNumber: 48
-						}
-					},
-					React.createElement('i', { onClick: this.toggleOptions, className: 'fa fa-plus-circle add', style: { color: "#A6E22E" }, __source: {
-							fileName: '../../../src/components/AddListEntry.jsx',
-							lineNumber: 48
-						}
-					})
-				)
-			);
-		}
-	});
+		}]);
 
-	module.exports = AddListEntry;
+		return AddListEntry;
+	})(_react.Component);
 
 
 /***/ },

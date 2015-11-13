@@ -12,8 +12,10 @@ const ResumeModel = require('./models/ResumeModel');
 const getResumeJSON = require('./libs/getResumeJSON');
 
 const Resume = require('./components/Resume');
-const Editor = require('immutable-editor');
+const Editor = require('immutable-editor').default;
 const Toolbar = require('./components/Toolbar.jsx');
+
+console.log(Editor);
 
 const appStyle = {
 	fontFamily: "Roboto, sans-serif",
